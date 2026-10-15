@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html dir="ltr" lang="zh-CN" data-ru-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RuanooUI — 组件示例</title>
+<link rel="stylesheet" href="ruanoo-ui.css">
+<script>
+  // 在样式生效前落定主题，避免深色用户看到白闪
+  (function () {
+    try {
+      var saved = localStorage.getItem('ruanoo-ui-theme');
+      if (saved === 'dark' || saved === 'light') {
+        document.documentElement.dataset.ruTheme = saved;
+      }
+    } catch (e) { /* 隐私模式下 localStorage 可能不可用 */ }
+  })();
+</script>
+<style>
+  /* ===== 示例页自身的框架样式，不属于 RuanooUI ===== */
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    font-family: var(--ru-font-family);
+    font-size: 14px;
+    color: var(--ru-neutral-foreground-rest);
+    background-color: var(--ru-fill-color);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .g-shell { display: flex; min-height: 100%; }
+
+  /* 侧栏 */
+  .g-nav {
+    position: sticky; top: 0; align-self: flex-start;
+    display: flex; flex-direction: column;
+    width: 216px; height: 100vh; flex: 0 0 216px;
+    padding: 20px 12px;
+    overflow-y: auto;
+    border-right: 1px solid var(--ru-modal-border);
+    background-color: var(--ru-settings-card-bg);
+  }
+  .g-brand { font-size: 15px; font-weight: 600; padding: 0 8px 2px; }
+  .g-brand-sub { font-size: 11px; color: var(--ru-settings-text-secondary); padding: 0 8px 16px; }
+  .g-nav a {
+    display: block; padding: 6px 8px; border-radius: 6px;
+    color: var(--ru-settings-text-primary); text-decoration: none; font-size: 13px;
+  }
+  .g-nav a:hover { background-color: var(--ru-neutral-fill-rest); }
+  .g-nav-sep { height: 1px; margin: 12px 8px; background-color: var(--ru-modal-border); }
+
+  /* 事件日志 */
+  .g-log-title {
+    padding: 0 8px 6px; font-size: 11px; font-weight: 600;
+    letter-spacing: .04em; text-transform: uppercase;
+    color: var(--ru-settings-text-secondary);
+  }
+  .g-log {
+    margin: 0; padding: 8px 10px; min-height: 96px;
+    border-radius: 6px; background-color: var(--ru-neutral-fill-rest);
+    font-family: Consolas, 'Courier New', monospace; font-size: 11px;
+    line-height: 1.6; color: var(--ru-settings-text-secondary);
+    white-space: pre-wrap; word-break: break-all;
+  }
+
+  /* 内容 */
+  .g-main { flex: 1; min-width: 0; padding: 24px 32px 72px; }
+  .g-h1 { margin: 0 0 4px; font-size: 22px; }
+  .g-lead { margin: 0 0 28px; color: var(--ru-settings-text-secondary); font-size: 13px; }
+  section { margin-bottom: 44px; scroll-margin-top: 20px; }
+  .g-h2 {
+    margin: 0 0 4px; font-size: 15px; font-weight: 600;
+    padding-bottom: 8px; border-bottom: 1px solid var(--ru-modal-border);
+  }
+  .g-desc { margin: 10px 0 14px; font-size: 12px; color: var(--ru-settings-text-secondary); line-height: 1.75; max-width: 720px; }
+  .g-desc code { font-size: 11px; }
+  .g-code {
+    margin: 0 0 16px; padding: 10px 12px; border-radius: 6px;
+    background-color: var(--ru-neutral-fill-rest);
+    font-family: Consolas, 'Courier New', monospace; font-size: 12px;
+    color: var(--ru-settings-text-primary); overflow-x: auto; white-space: pre;
+  }
+  .g-row { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-bottom: 14px; }
+  .g-col { display: flex; flex-direction: column; gap: 16px; max-width: 420px; }
+  .g-label { font-size: 12px; color: var(--ru-settings-text-secondary); margin-bottom: 4px; display: block; }
+  .g-cell { min-width: 180px; }
+  .g-note { font-size: 12px; color: var(--ru-settings-text-secondary); margin: 10px 0 0; }
+
+  /* 主题切换按钮 */
+  .g-theme { display: flex; gap: 6px; padding: 0 8px 12px; }
+  .g-theme button {
+    flex: 1; padding: 5px 0; font-size: 12px; font-family: var(--ru-font-family);
+    border: 1px solid var(--ru-modal-border); border-radius: 6px; cursor: pointer;
+    background-color: var(--ru-btn-secondary-bg); color: var(--ru-settings-text-primary);
+  }
+  .g-theme button.on {
+    background-color: var(--ru-accent-foreground-rest);
+    color: var(--ru-accent-foreground-invert);
+    border-color: var(--ru-accent-foreground-rest);
+  }
+</style>
+</head>
+<body>
+
+<div class="g-shell">
+
+  <!-- ===================== 侧栏 ===================== -->
+  <nav class="g-nav">
+    <div class="g-brand">RuanooUI</div>
+    <div class="g-brand-sub">纯 CSS 组件库 · 无构建</div>
+
+    <div class="g-theme">
+      <button type="button" data-ru-set-theme="light">浅色</button>
+      <button type="button" data-ru-set-theme="dark">深色</button>
+    </div>
+    <div class="g-nav-sep"></div>
+
+    <a href="#buttons">按钮</a>
+    <a href="#inputs">输入框</a>
+    <a href="#switches">开关</a>
+    <a href="#selects">下拉选择</a>
+    <a href="#segments">分段控件</a>
+    <a href="#cards">卡片</a>
+    <a href="#menus">浮动层</a>
+    <a href="#options">列表选择项</a>
+    <a href="#modals">弹窗</a>
+    <a href="#footer">页脚</a>
+
+    <div class="g-nav-sep"></div>
+    <div class="g-log-title">事件</div>
+    <pre class="g-log" id="event-log">等待交互…</pre>
+  </nav>
+
+  <!-- ===================== 内容 ===================== -->
+  <main class="g-main">
+    <h1 class="g-h1">RuanooUI 组件示例</h1>
+    <p class="g-lead">
+      全部组件由 CSS 变量驱动，浅色与深色两套主题。左侧栏可切换主题，
+      下方的交互事件会实时记录到侧栏底部。
+    </p>
+
+    <!-- ---------- 按钮 ---------- -->
+    <section id="buttons">
+      <h2 class="g-h2">按钮</h2>
+      <p class="g-desc">
+        圆角 6px、高 32px。三种语义变体共用 <code>.ruanoo-btn</code> 基类；
+        纯文字操作使用 <code>.ruanoo-icon-btn-text</code>。键盘聚焦有独立焦点环，
+        禁用态降低不透明度。
+      </p>
+      <div class="g-code">&lt;button class="ruanoo-btn ruanoo-btn-primary"&gt;保存&lt;/button&gt;
+&lt;button class="ruanoo-btn ruanoo-btn-secondary"&gt;取消&lt;/button&gt;
+&lt;button class="ruanoo-btn ruanoo-btn-danger"&gt;删除&lt;/button&gt;
+&lt;button class="ruanoo-btn ruanoo-btn-primary" disabled&gt;保存&lt;/button&gt;
+
+&lt;button class="ruanoo-icon-btn-text"&gt;&lt;svg/&gt;&lt;span&gt;编辑页面布局&lt;/span&gt;&lt;/button&gt;</div>
+      <div class="g-row">
+        <button type="button" class="ruanoo-btn ruanoo-btn-primary">保存</button>
+        <button type="button" class="ruanoo-btn ruanoo-btn-secondary">取消</button>
+        <button type="button" class="ruanoo-btn ruanoo-btn-danger">删除</button>
+        <button type="button" class="ruanoo-btn ruanoo-btn-primary" disabled>保存</button>
+      </div>
+      <div class="g-row">
+        <button type="button" class="ruanoo-icon-btn-text" style="width:auto;padding:0 14px">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L18.5 9.5a2.828 2.828 0 1 0-4-4L4 16zm9.5-13.5l4 4"/></svg>
+          <span>编辑页面布局</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- ---------- 输入框 ---------- -->
+    <section id="inputs">
+      <h2 class="g-h2">输入框</h2>
+      <p class="g-desc">
+        高 36px，描边 3px，聚焦时只换描边颜色、粗细不变。
+        <code>.ruanoo-input-container</code> 是外壳，负责圆角裁切与校验态；
+        加 <code>.ruanoo-error</code> 走危险色，配合 <code>.ruanoo-error-tip.ruanoo-active</code> 显示提示。
+      </p>
+      <div class="g-code">&lt;div class="ruanoo-input-container"&gt;
+  &lt;input class="ruanoo-input" placeholder="https://example.com"&gt;
+&lt;/div&gt;
+
+&lt;div class="ruanoo-input-container ruanoo-error"&gt;
+  &lt;input class="ruanoo-input" value="not-a-url"&gt;
+&lt;/div&gt;
+&lt;div class="ruanoo-error-tip ruanoo-active"&gt;&lt;svg/&gt;&lt;span&gt;请输入有效 URL&lt;/span&gt;&lt;/div&gt;</div>
+      <div class="g-col">
+        <div class="g-cell" style="min-width:340px">
+          <label class="g-label">常规</label>
+          <div class="ruanoo-input-container">
+            <input type="text" class="ruanoo-input" placeholder="https://example.com/image.jpg">
+          </div>
+        </div>
+        <div class="g-cell" style="min-width:340px">
+          <label class="g-label">校验失败</label>
+          <div class="ruanoo-input-container ruanoo-error">
+            <input type="text" class="ruanoo-input" value="not-a-valid-url">
+          </div>
+          <div class="ruanoo-error-tip ruanoo-active">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0-18 0m9-4v4m0 4h.01"/></svg>
+            <span>请输入有效 URL</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---------- 开关 ---------- -->
+    <section id="switches">
+      <h2 class="g-h2">开关</h2>
+      <p class="g-desc">
+        由 <code>.ruanoo-switch::before</code>（左半胶囊）、<code>.ruanoo-slider::before</code>（手柄）、
+        <code>.ruanoo-switch::after</code>（右半胶囊）三块组成。位置与宽度统一由可过渡变量
+        <code>--ru-p</code> 推导，因此滑动全程手柄与两侧胶囊的间隙恒为 2px。
+        纯 CSS 实现，依赖 <code>@property</code> 与 <code>:has()</code>。
+      </p>
+      <div class="g-code">&lt;div class="ruanoo-switch-container"&gt;
+  &lt;span class="ruanoo-setting-status-text"&gt;关闭&lt;/span&gt;
+  &lt;label class="ruanoo-switch"&gt;
+    &lt;input type="checkbox"&gt;
+    &lt;span class="ruanoo-slider"&gt;&lt;/span&gt;
+  &lt;/label&gt;
+&lt;/div&gt;</div>
+      <div class="g-row">
+        <div class="ruanoo-switch-container">
+          <span class="ruanoo-setting-status-text">关闭</span>
+          <label class="ruanoo-switch">
+            <input type="checkbox">
+            <span class="ruanoo-slider" id="switch-off"></span>
+          </label>
+        </div>
+        <div class="ruanoo-switch-container">
+          <span class="ruanoo-setting-status-text">打开</span>
+          <label class="ruanoo-switch">
+            <input type="checkbox" checked>
+            <span class="ruanoo-slider" id="switch-on"></span>
+          </label>
+        </div>
+      </div>
+      <p class="g-note">
+        手柄关闭态是空心圆环，打开态收成圆头竖线；两侧胶囊的宽度互补伸缩，
+        末段再渐隐，所以收缩过程不会出现被压扁的弧度。
+      </p>
+    </section>
+
+    <!-- ---------- 下拉选择 ---------- -->
+    <section id="selects">
+      <h2 class="g-h2">下拉选择</h2>
+      <p class="g-desc">
+        触发器与浮层都由本库渲染，浮层是 <code>position: fixed</code>，因此不会被父容器的
+        <code>overflow</code> 裁掉；空间不足时自动向上展开，并收敛到视口内。
+        支持方向键、<code>Home</code>/<code>End</code>、<code>Enter</code>、<code>Esc</code>，
+        点击组件之外或按 <code>Tab</code> 都会收起。
+        选中后派发 <code>ruanoo:select-change</code>。
+      </p>
+      <div class="g-code">&lt;div class="ruanoo-custom-select-wrapper" data-ru-select&gt;
+  &lt;select class="ruanoo-select-box" tabindex="-1" aria-hidden="true"&gt;&lt;/select&gt;
+  &lt;button type="button" class="ruanoo-custom-select-display"
+          aria-haspopup="listbox" aria-expanded="false"&gt;
+    &lt;span class="ruanoo-custom-select-text"&gt;
+      &lt;svg class="ruanoo-custom-select-preset-icon"&gt;…&lt;/svg&gt;
+      跟随系统
+    &lt;/span&gt;
+    &lt;svg class="ruanoo-custom-select-arrow"&gt;…&lt;/svg&gt;
+  &lt;/button&gt;
+  &lt;div class="ruanoo-custom-select-dropdown" role="listbox"&gt;
+    &lt;div class="ruanoo-custom-select-option ruanoo-selected"
+         role="option" aria-selected="true" data-ru-value="auto"&gt;跟随系统&lt;/div&gt;
+    &lt;div class="ruanoo-custom-select-option"
+         role="option" aria-selected="false" data-ru-value="light"&gt;浅色&lt;/div&gt;
+    &lt;div class="ruanoo-custom-select-option ruanoo-disabled"
+         role="option" aria-disabled="true"&gt;高对比度&lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</div>
+      <div class="g-col">
+        <div class="g-cell" style="min-width:280px">
+          <div class="ruanoo-custom-select-wrapper" data-ru-select>
+            <select class="ruanoo-select-box" tabindex="-1" aria-hidden="true"></select>
+            <button type="button" class="ruanoo-custom-select-display" aria-haspopup="listbox" aria-expanded="false">
+              <span class="ruanoo-custom-select-text">
+                <svg class="ruanoo-custom-select-preset-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 5a1 1 0 0 1 1-1h16a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1zm4 15h10m-8-4v4m6-4v4"/></svg>
+                跟随系统
+              </span>
+              <svg class="ruanoo-custom-select-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9l6 6l6-6"/></svg>
+            </button>
+            <div class="ruanoo-custom-select-dropdown" role="listbox">
+              <div class="ruanoo-custom-select-option ruanoo-selected" role="option" aria-selected="true" data-ru-value="auto">跟随系统</div>
+              <div class="ruanoo-custom-select-option" role="option" aria-selected="false" data-ru-value="light">浅色</div>
+              <div class="ruanoo-custom-select-option" role="option" aria-selected="false" data-ru-value="dark">深色</div>
+              <div class="ruanoo-custom-select-option ruanoo-disabled" role="option" aria-disabled="true" data-ru-value="hc">高对比度（不可选）</div>
+            </div>
+          </div>
+        </div>
+        <div class="g-cell" style="min-width:260px">
+          <label class="g-label">整条禁用</label>
+          <div class="ruanoo-custom-select-wrapper">
+            <button type="button" class="ruanoo-custom-select-display ruanoo-disabled" disabled>
+              <span class="ruanoo-custom-select-text">不可选</span>
+              <svg class="ruanoo-custom-select-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9l6 6l6-6"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---------- 分段控件 ---------- -->
+    <section id="segments">
+      <h2 class="g-h2">分段控件</h2>
+      <p class="g-desc">
+        两种外观共用同一套滑块机制：<code>.ruanoo-theme-switch</code>（图标 + 文字，三项等分）与
+        <code>.ruanoo-layout-presets</code>（缩略图卡片）。滑块由容器上的
+        <code>.ruanoo-idx-1</code> / <code>.ruanoo-idx-2</code> 控制位移，首项无需额外类。
+        分别派发 <code>ruanoo:segment-change</code> 与 <code>ruanoo:preset-change</code>。
+      </p>
+      <div class="g-code">&lt;div class="ruanoo-theme-switch" data-ru-segment role="radiogroup"&gt;
+  &lt;button class="ruanoo-theme-option ruanoo-active" role="radio" aria-checked="true"&gt;
+    &lt;svg/&gt;
+    &lt;span class="ruanoo-theme-option-label"&gt;
+      &lt;span class="ruanoo-theme-option-label-inner"&gt;系统&lt;/span&gt;
+    &lt;/span&gt;
+  &lt;/button&gt;
+  …
+&lt;/div&gt;
+
+&lt;div class="ruanoo-layout-presets" data-ru-presets&gt;
+  &lt;div class="ruanoo-preset-card ruanoo-active" data-ru-layout-val="inspirational"
+       role="radio" tabindex="0" aria-checked="true"&gt;
+    &lt;div class="ruanoo-preset-thumb"&gt;…&lt;/div&gt;
+    &lt;span class="ruanoo-preset-card-label"&gt;展望&lt;/span&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+
+&lt;!-- 当前配置与任何预设都不匹配时，隐藏滑块 --&gt;
+&lt;div class="ruanoo-layout-presets ruanoo-no-thumb"&gt;…&lt;/div&gt;</div>
+
+      <div class="g-col" style="max-width:420px">
+        <div>
+          <label class="g-label">主题模式</label>
+          <div class="ruanoo-theme-switch" data-ru-segment role="radiogroup">
+            <button type="button" class="ruanoo-theme-option ruanoo-active" role="radio" aria-checked="true">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 5a1 1 0 0 1 1-1h16a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1zm4 15h10m-8-4v4m6-4v4"/></svg>
+              <span class="ruanoo-theme-option-label"><span class="ruanoo-theme-option-label-inner">系统</span></span>
+            </button>
+            <button type="button" class="ruanoo-theme-option" role="radio" aria-checked="false">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 12a4 4 0 1 0 8 0a4 4 0 1 0-8 0m-5 0h1m8-9v1m8 8h1m-9 8v1M5.6 5.6l.7.7m12.1-.7l-.7.7m0 11.4l.7.7m-12.1-.7l-.7.7"/></svg>
+              <span class="ruanoo-theme-option-label"><span class="ruanoo-theme-option-label-inner">浅色</span></span>
+            </button>
+            <button type="button" class="ruanoo-theme-option" role="radio" aria-checked="false">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3h.393a7.5 7.5 0 0 0 7.92 12.446A9 9 0 1 1 12 2.992z"/></svg>
+              <span class="ruanoo-theme-option-label"><span class="ruanoo-theme-option-label-inner">深色</span></span>
+            </button>
+          </div>
+        </div>
+
+        <div>
+          <span class="ruanoo-preset-section-label">预设</span>
+          <div class="ruanoo-layout-presets" id="preset-group" data-ru-presets>
+            <div class="ruanoo-preset-card ruanoo-active" data-ru-layout-val="inspirational" role="radio" tabindex="0" aria-checked="true">
+              <div class="ruanoo-preset-thumb">
+                <div class="ruanoo-preset-thumb-box" style="bottom: 30px"></div>
+                <div class="ruanoo-preset-thumb-dots" style="top: 20px"><span></span><span></span><span></span><span></span><span></span><span></span></div>
+              </div>
+              <span class="ruanoo-preset-card-label">展望</span>
+            </div>
+            <div class="ruanoo-preset-card" data-ru-layout-val="focused" role="radio" tabindex="-1" aria-checked="false">
+              <div class="ruanoo-preset-thumb">
+                <div class="ruanoo-preset-thumb-logo" style="top: 10px"></div>
+                <div class="ruanoo-preset-thumb-box" style="bottom: 22px"></div>
+                <div class="ruanoo-preset-thumb-dots" style="top: 28px"><span></span><span></span><span></span><span></span><span></span><span></span></div>
+              </div>
+              <span class="ruanoo-preset-card-label">专注</span>
+            </div>
+            <div class="ruanoo-preset-card" data-ru-layout-val="appreciate" role="radio" tabindex="-1" aria-checked="false">
+              <div class="ruanoo-preset-thumb">
+                <div class="ruanoo-preset-thumb-box" style="bottom: 34px"></div>
+              </div>
+              <span class="ruanoo-preset-card-label">欣赏</span>
+            </div>
+          </div>
+          <div class="g-row" style="margin:10px 0 0">
+            <button type="button" class="ruanoo-icon-btn-text" id="preset-custom" style="width:auto;padding:0 12px;height:28px;font-size:12px">
+              <span>模拟自定义配置（隐藏滑块）</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---------- 卡片 ---------- -->
+    <section id="cards">
+      <h2 class="g-h2">卡片</h2>
+      <p class="g-desc">
+        <code>.ruanoo-settings-card</code> 不带描边，靠底色与页面区分；
+        <code>.ruanoo-settings-card-header</code> 用于左右分栏的标题行，
+        <code>.ruanoo-settings-content</code> 是卡片的纵向堆叠容器。
+      </p>
+      <div class="g-code">&lt;div class="ruanoo-settings-content"&gt;
+  &lt;div class="ruanoo-settings-card"&gt;
+    &lt;div class="ruanoo-settings-card-header"&gt;
+      &lt;span&gt;主题模式&lt;/span&gt;
+      &lt;span&gt;跟随系统&lt;/span&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+  &lt;div class="ruanoo-settings-card"&gt;
+    &lt;div class="ruanoo-settings-card-title"&gt;配置文件&lt;/div&gt;
+    …
+    &lt;input type="file" id="import-file" class="ruanoo-file-input-hidden"&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</div>
+      <div class="ruanoo-settings-content" style="max-width:520px;padding:0">
+        <div class="ruanoo-settings-card">
+          <div class="ruanoo-settings-card-header">
+            <span>主题模式</span>
+            <span style="font-weight:400;color:var(--ru-settings-text-secondary)">跟随系统</span>
+          </div>
+        </div>
+        <div class="ruanoo-settings-card">
+          <div class="ruanoo-settings-card-title">配置文件</div>
+          <div class="ruanoo-custom-select-wrapper" data-ru-select>
+            <select class="ruanoo-select-box" tabindex="-1" aria-hidden="true"></select>
+            <button type="button" class="ruanoo-custom-select-display" aria-haspopup="listbox" aria-expanded="false">
+              <span class="ruanoo-custom-select-text">默认布局</span>
+              <svg class="ruanoo-custom-select-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9l6 6l6-6"/></svg>
+            </button>
+            <div class="ruanoo-custom-select-dropdown" role="listbox">
+              <div class="ruanoo-custom-select-option ruanoo-selected" role="option" aria-selected="true" data-ru-value="default">默认布局</div>
+              <div class="ruanoo-custom-select-option" role="option" aria-selected="false" data-ru-value="compact">紧凑布局</div>
+            </div>
+          </div>
+          <button type="button" class="ruanoo-icon-btn-text" id="import-btn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2M7 11l5 5l5-5m-5-7v12"/></svg>
+            <span>导入配置</span>
+          </button>
+          <input type="file" id="import-file" class="ruanoo-file-input-hidden" accept=".json">
+        </div>
+      </div>
+    </section>
+
+    <!-- ---------- 浮动层 ---------- -->
+    <section id="menus">
+      <h2 class="g-h2">浮动层</h2>
+      <p class="g-desc">
+        <code>.ruanoo-quicklink-menu</code> 是右键菜单，<code>.ruanoo-icon-preset-panel</code> 是图标宫格面板。
+        两者与下拉浮层共用同一套分层方式：透明描边占位 + <code>--ru-dropdown-shadow</code>，
+        不使用实线边框。层级由 <code>--ru-z-*</code> 变量统一控制。
+      </p>
+      <div class="g-code">&lt;div class="ruanoo-quicklink-menu ruanoo-active" role="menu"&gt;
+  &lt;button class="ruanoo-quicklink-menu-item" role="menuitem"&gt;
+    &lt;svg/&gt;&lt;span&gt;在新标签页打开&lt;/span&gt;
+  &lt;/button&gt;
+&lt;/div&gt;
+
+&lt;div class="ruanoo-icon-preset-panel ruanoo-active"&gt;
+  &lt;div class="ruanoo-icon-preset-group"&gt;
+    &lt;button class="ruanoo-icon-preset-item ruanoo-selected"&gt;&lt;svg/&gt;&lt;/button&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</div>
+      <div class="g-row" style="align-items:flex-start">
+        <div class="ruanoo-quicklink-menu ruanoo-active" style="position:static;display:block" role="menu">
+          <button type="button" class="ruanoo-quicklink-menu-item" role="menuitem" data-ru-action="open">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 6H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6m-7 1l9-9m-5 0h5v5"/></svg>
+            <span>在新标签页打开</span>
+          </button>
+          <button type="button" class="ruanoo-quicklink-menu-item" role="menuitem" data-ru-action="edit">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L18.5 9.5a2.828 2.828 0 1 0-4-4L4 16zm9.5-13.5l4 4"/></svg>
+            <span>编辑</span>
+          </button>
+        </div>
+
+        <div class="ruanoo-icon-preset-panel ruanoo-active" style="position:static">
+          <div class="ruanoo-icon-preset-group">
+            <button type="button" class="ruanoo-icon-preset-item ruanoo-selected" title="实心">
+              <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 3.34a10 10 0 1 1-4.995 8.984L2 12l.005-.324A10 10 0 0 1 7 3.34"/></svg>
+            </button>
+            <button type="button" class="ruanoo-icon-preset-item" title="实心">
+              <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19 2H5a3 3 0 0 0-3 3v14a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3V5a3 3 0 0 0-3-3"/></svg>
+            </button>
+            <button type="button" class="ruanoo-icon-preset-item" title="实心">
+              <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 1.67a2.91 2.91 0 0 0-2.492 1.403L1.398 16.61a2.914 2.914 0 0 0 2.484 4.385h16.225a2.914 2.914 0 0 0 2.503-4.371L14.494 3.078A2.92 2.92 0 0 0 12 1.67"/></svg>
+            </button>
+          </div>
+          <div class="ruanoo-icon-preset-group">
+            <button type="button" class="ruanoo-icon-preset-item" title="描边">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 18 0a9 9 0 1 0-18 0"/></svg>
+            </button>
+            <button type="button" class="ruanoo-icon-preset-item" title="描边">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+            </button>
+            <button type="button" class="ruanoo-icon-preset-item" title="描边">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.363 3.591L2.257 17.125a1.914 1.914 0 0 0 1.636 2.871h16.214a1.914 1.914 0 0 0 1.636-2.87L13.637 3.59a1.914 1.914 0 0 0-3.274 0"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---------- 列表选择项 ---------- -->
+    <section id="options">
+      <h2 class="g-h2">列表选择项</h2>
+      <p class="g-desc">
+        纵向单列选择，选中态由 <code>aria-selected="true"</code> 驱动而非类名，
+        左侧指示条是 <code>::before</code>。支持上下方向键与
+        <code>Home</code>/<code>End</code>，选中派发 <code>ruanoo:manage-select</code>，
+        <code>detail.action</code> 取自 <code>data-ru-action</code>。
+      </p>
+      <div class="g-code">&lt;div class="ruanoo-manage-list" data-ru-manage role="listbox"&gt;
+  &lt;div class="ruanoo-manage-option" role="option" tabindex="0"
+       aria-selected="true" data-ru-action="export"&gt;
+    &lt;svg/&gt;&lt;span class="ruanoo-manage-option-label"&gt;导出配置&lt;/span&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</div>
+      <div style="max-width:340px">
+        <p class="ruanoo-manage-list-hint">选择要执行的操作</p>
+        <div class="ruanoo-manage-list" data-ru-manage role="listbox" aria-label="示例操作">
+          <div class="ruanoo-manage-option" role="option" tabindex="0" aria-selected="true" data-ru-action="export">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14m-6 6l6-6m-6-6l6 6"/></svg>
+            <span class="ruanoo-manage-option-label">导出配置</span>
+          </div>
+          <div class="ruanoo-manage-option" role="option" tabindex="-1" aria-selected="false" data-ru-action="restore">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.06 13a9 9 0 1 0 .49-4.087"/><path d="M3 4.001v5h5M11 12a1 1 0 1 0 2 0a1 1 0 1 0-2 0"/></svg>
+            <span class="ruanoo-manage-option-label">恢复配置</span>
+          </div>
+          <div class="ruanoo-manage-option" role="option" tabindex="-1" aria-selected="false" data-ru-action="clear">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16m-10 4v6m4-6v6M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2l1-12M9 7V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v3"/></svg>
+            <span class="ruanoo-manage-option-label">清空数据</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---------- 弹窗 ---------- -->
+    <section id="modals">
+      <h2 class="g-h2">弹窗</h2>
+      <p class="g-desc">
+        外层 <code>.ruanoo-modal-overlay</code> 负责遮罩与显隐，内层
+        <code>.ruanoo-modal-dialog</code> 承载内容。脚本会自动补上
+        <code>role="dialog"</code>、<code>aria-modal</code> 与标题关联，
+        打开时把焦点移入、关闭时归还给触发按钮，并把 <code>Tab</code> 焦点锁在对话框内。
+        示例里的保存按钮带 URL 校验，校验通过才关闭。
+      </p>
+      <div class="g-code">&lt;button class="ruanoo-btn ruanoo-btn-secondary"
+        data-ru-open-modal="my-modal"&gt;打开&lt;/button&gt;
+
+&lt;div class="ruanoo-modal-overlay" id="my-modal"&gt;
+  &lt;div class="ruanoo-modal-dialog"&gt;
+    &lt;div class="ruanoo-modal-header"&gt;标题&lt;/div&gt;
+    &lt;div class="ruanoo-form-row"&gt;
+      &lt;div class="ruanoo-form-group"&gt;…&lt;/div&gt;
+      &lt;div class="ruanoo-form-group ruanoo-form-group-narrow"&gt;…&lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div class="ruanoo-modal-footer"&gt;
+      &lt;div class="ruanoo-modal-footer-right"&gt;
+        &lt;button class="ruanoo-btn ruanoo-btn-secondary" data-ru-close-modal&gt;取消&lt;/button&gt;
+        &lt;button class="ruanoo-btn ruanoo-btn-primary"&gt;保存&lt;/button&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</div>
+      <div class="g-row">
+        <button type="button" class="ruanoo-btn ruanoo-btn-secondary" data-ru-open-modal="demo-modal">打开弹窗</button>
+      </div>
+    </section>
+
+    <!-- ---------- 页脚 ---------- -->
+    <section id="footer">
+      <h2 class="g-h2">页脚</h2>
+      <p class="g-desc">
+        <code>.ruanoo-settings-footer</code> 内可放多行
+        <code>.ruanoo-settings-footer-links</code>，第二行由相邻选择器自动调淡，
+        最下方是 <code>.ruanoo-settings-footer-text</code>。
+      </p>
+      <div class="g-code">&lt;div class="ruanoo-settings-footer"&gt;
+  &lt;div class="ruanoo-settings-footer-links"&gt;&lt;a&gt;版本&lt;/a&gt; …&lt;/div&gt;
+  &lt;div class="ruanoo-settings-footer-links"&gt;&lt;a&gt;隐私政策&lt;/a&gt; · …&lt;/div&gt;
+  &lt;div class="ruanoo-settings-footer-text"&gt;免责声明&lt;/div&gt;
+&lt;/div&gt;</div>
+      <div class="ruanoo-settings-card" style="padding:0;max-width:560px">
+        <div class="ruanoo-settings-footer">
+          <div class="ruanoo-settings-footer-links">
+            <a href="#">RuanooUI 1.0.0</a>| <span>由</span> <a href="#">Ruanoo</a> <span>维护</span>
+          </div>
+          <div class="ruanoo-settings-footer-links">
+            <a href="#">隐私政策</a> ·
+            <a href="#">开源协议</a> ·
+            <a href="#">帮助与反馈</a>
+          </div>
+          <div class="ruanoo-settings-footer-text">本页仅为组件示例，与任何第三方服务无关。</div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- ===================== 弹窗实例 ===================== -->
+<div class="ruanoo-modal-overlay" id="demo-modal">
+  <div class="ruanoo-modal-dialog">
+    <div class="ruanoo-modal-header">自定义在线壁纸</div>
+
+    <div class="ruanoo-form-row">
+      <div class="ruanoo-form-group">
+        <label class="ruanoo-form-label" for="demo-url">图片或视频 URL</label>
+        <div class="ruanoo-input-container" id="demo-url-container">
+          <input type="text" id="demo-url" class="ruanoo-input" placeholder="https://example.com/image.jpg">
+        </div>
+        <div class="ruanoo-error-tip" id="demo-url-tip">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0-18 0m9-4v4m0 4h.01"/></svg>
+          <span>请输入有效 URL</span>
+        </div>
+      </div>
+      <div class="ruanoo-form-group ruanoo-form-group-narrow">
+        <label class="ruanoo-form-label" for="demo-fit">填充方式</label>
+        <div class="ruanoo-custom-select-wrapper" data-ru-select>
+          <select class="ruanoo-select-box" tabindex="-1" aria-hidden="true"></select>
+          <button type="button" class="ruanoo-custom-select-display" aria-haspopup="listbox" aria-expanded="false">
+            <span class="ruanoo-custom-select-text">填充</span>
+            <svg class="ruanoo-custom-select-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9l6 6l6-6"/></svg>
+          </button>
+          <div class="ruanoo-custom-select-dropdown" role="listbox">
+            <div class="ruanoo-custom-select-option ruanoo-selected" role="option" aria-selected="true" data-ru-value="cover">填充</div>
+            <div class="ruanoo-custom-select-option" role="option" aria-selected="false" data-ru-value="contain">适应</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="ruanoo-modal-footer">
+      <div class="ruanoo-modal-footer-right">
+        <button type="button" class="ruanoo-btn ruanoo-btn-secondary" data-ru-close-modal>取消</button>
+        <button type="button" class="ruanoo-btn ruanoo-btn-primary" id="demo-save">保存</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="ruanoo-ui.js"></script>
+<script>
+/* ===== 示例页自身的接线，不属于 RuanooUI ===== */
+(function () {
+  'use strict';
+
+  var log = document.getElementById('event-log');
+  var lines = [];
+
+  function record(text) {
+    lines.unshift(text);
+    lines = lines.slice(0, 10);
+    log.textContent = lines.join('\n');
+  }
+
+  /* 把四个自定义事件汇总到侧栏日志 */
+  [
+    ['ruanoo:select-change', function (d) { return d.value; }],
+    ['ruanoo:segment-change', function (d) { return d.index; }],
+    ['ruanoo:preset-change', function (d) { return d.value; }],
+    ['ruanoo:manage-select', function (d) { return d.action; }]
+  ].forEach(function (pair) {
+    document.addEventListener(pair[0], function (e) {
+      record(pair[0].replace('ruanoo:', '') + '  →  ' + pair[1](e.detail || {}));
+    });
+  });
+
+  /* 弹窗：URL 校验通过才允许保存 */
+  var urlInput = document.getElementById('demo-url');
+  var urlBox = document.getElementById('demo-url-container');
+  var urlTip = document.getElementById('demo-url-tip');
+
+  function isValidUrl(value) {
+    if (!value) return false;
+    try { return !!new URL(value); } catch (e) { return false; }
+  }
+
+  function validate() {
+    var ok = isValidUrl(urlInput.value.trim());
+    urlBox.classList.toggle('ruanoo-error', !ok);
+    urlTip.classList.toggle('ruanoo-active', !ok);
+    return ok;
+  }
+
+  urlInput.addEventListener('input', function () {
+    if (urlBox.classList.contains('ruanoo-error')) validate();
+  });
+
+  document.getElementById('demo-save').addEventListener('click', function () {
+    if (!validate()) {
+      record('modal  →  URL 校验未通过');
+      urlInput.focus();
+      return;
+    }
+    RuanooUI.closeModal(this);
+    record('modal  →  已保存 ' + urlInput.value.trim());
+  });
+
+  /* 预设：模拟"当前配置与任何预设都不匹配" */
+  document.getElementById('preset-custom').addEventListener('click', function () {
+    var group = document.getElementById('preset-group');
+    Array.prototype.forEach.call(group.querySelectorAll('.ruanoo-preset-card'), function (card) {
+      card.classList.remove('ruanoo-active');
+      card.setAttribute('aria-checked', 'false');
+      card.tabIndex = -1;
+    });
+    group.classList.remove('ruanoo-idx-0', 'ruanoo-idx-1', 'ruanoo-idx-2');
+    group.classList.add('ruanoo-no-thumb');
+    record('preset  →  自定义配置（滑块已隐藏）');
+  });
+
+  /* 导入配置：用隐藏的 file input */
+  var fileInput = document.getElementById('import-file');
+  document.getElementById('import-btn').addEventListener('click', function () {
+    fileInput.click();
+  });
+  fileInput.addEventListener('change', function () {
+    record('file  →  ' + (this.files[0] ? this.files[0].name : '未选择文件'));
+    this.value = '';
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-ru-theme="light">
+<head>
+<meta charset="UTF-8">
+<title>RuanooUI 自检</title>
+<link rel="stylesheet" href="../ruanoo-ui.css">
+<style>
+  body { margin: 24px; font-family: var(--ru-font-family); color: var(--ru-neutral-foreground-rest); }
+  h1 { font-size: 16px; }
+  #selftest {
+    font-family: Consolas, 'Courier New', monospace; font-size: 13px;
+    line-height: 1.7; white-space: pre-wrap; padding: 12px;
+    border-radius: 6px; background-color: var(--ru-neutral-fill-rest);
+  }
+  .stage { position: absolute; left: -9999px; top: 0; width: 320px; }
+</style>
+</head>
+<body>
+
+<h1>RuanooUI 交互自检</h1>
+<pre id="selftest">running…</pre>
+
+<!-- 被测组件实例（移出视口，不影响阅读） -->
+<div class="stage">
+
+  <div class="ruanoo-custom-select-wrapper" id="t-select" data-ru-select>
+    <select class="ruanoo-select-box" tabindex="-1" aria-hidden="true"></select>
+    <button type="button" class="ruanoo-custom-select-display" aria-haspopup="listbox" aria-expanded="false">
+      <span class="ruanoo-custom-select-text">跟随系统</span>
+      <svg class="ruanoo-custom-select-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9l6 6l6-6"/></svg>
+    </button>
+    <div class="ruanoo-custom-select-dropdown" role="listbox">
+      <div class="ruanoo-custom-select-option ruanoo-selected" role="option" aria-selected="true" data-ru-value="auto">跟随系统</div>
+      <div class="ruanoo-custom-select-option" role="option" aria-selected="false" data-ru-value="light">浅色</div>
+      <div class="ruanoo-custom-select-option ruanoo-disabled" role="option" aria-disabled="true" data-ru-value="hc">高对比度</div>
+    </div>
+  </div>
+
+  <div class="ruanoo-theme-switch" id="t-seg" data-ru-segment role="radiogroup">
+    <button type="button" class="ruanoo-theme-option ruanoo-active" role="radio" aria-checked="true">
+      <span class="ruanoo-theme-option-label"><span class="ruanoo-theme-option-label-inner">系统</span></span>
+    </button>
+    <button type="button" class="ruanoo-theme-option" role="radio" aria-checked="false">
+      <span class="ruanoo-theme-option-label"><span class="ruanoo-theme-option-label-inner">浅色</span></span>
+    </button>
+    <button type="button" class="ruanoo-theme-option" role="radio" aria-checked="false">
+      <span class="ruanoo-theme-option-label"><span class="ruanoo-theme-option-label-inner">深色</span></span>
+    </button>
+  </div>
+
+  <div class="ruanoo-layout-presets" id="t-preset" data-ru-presets>
+    <div class="ruanoo-preset-card ruanoo-active" data-ru-layout-val="a" role="radio" tabindex="0" aria-checked="true">
+      <span class="ruanoo-preset-card-label">A</span>
+    </div>
+    <div class="ruanoo-preset-card" data-ru-layout-val="b" role="radio" tabindex="-1" aria-checked="false">
+      <span class="ruanoo-preset-card-label">B</span>
+    </div>
+    <div class="ruanoo-preset-card" data-ru-layout-val="c" role="radio" tabindex="-1" aria-checked="false">
+      <span class="ruanoo-preset-card-label">C</span>
+    </div>
+  </div>
+
+  <div class="ruanoo-manage-list" id="t-manage" data-ru-manage role="listbox">
+    <div class="ruanoo-manage-option" role="option" tabindex="0" aria-selected="true" data-ru-action="export">
+      <span class="ruanoo-manage-option-label">导出</span>
+    </div>
+    <div class="ruanoo-manage-option" role="option" tabindex="-1" aria-selected="false" data-ru-action="restore">
+      <span class="ruanoo-manage-option-label">恢复</span>
+    </div>
+    <div class="ruanoo-manage-option" role="option" tabindex="-1" aria-selected="false" data-ru-action="clear">
+      <span class="ruanoo-manage-option-label">清空</span>
+    </div>
+  </div>
+
+  <button type="button" id="t-open" class="ruanoo-btn ruanoo-btn-primary" data-ru-open-modal="t-modal">打开</button>
+
+  <div class="ruanoo-modal-overlay" id="t-modal">
+    <div class="ruanoo-modal-dialog">
+      <div class="ruanoo-modal-header">标题</div>
+      <div class="ruanoo-modal-footer">
+        <div class="ruanoo-modal-footer-right">
+          <button type="button" class="ruanoo-btn ruanoo-btn-secondary" data-ru-close-modal>取消</button>
+          <button type="button" class="ruanoo-btn ruanoo-btn-primary" id="t-save">保存</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script src="../ruanoo-ui.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  var results = [];
+
+  function check(name, ok, extra) {
+    results.push({ name: name, ok: !!ok, extra: extra || '' });
+  }
+
+  function key(el, k, shift) {
+    el.dispatchEvent(new KeyboardEvent('keydown', {
+      key: k, shiftKey: !!shift, bubbles: true, cancelable: true
+    }));
+  }
+
+  function report() {
+    var pass = results.filter(function (r) { return r.ok; }).length;
+    var lines = results.map(function (r) {
+      return (r.ok ? '✓ ' : '✗ ') + r.name + (r.ok ? '' : '\n      ' + r.extra);
+    });
+    lines.push('');
+    lines.push('通过 ' + pass + ' / ' + results.length + (pass === results.length ? '  全部通过' : '  存在失败'));
+    var pre = document.getElementById('selftest');
+    pre.textContent = lines.join('\n');
+    pre.setAttribute('data-pass', String(pass));
+    pre.setAttribute('data-total', String(results.length));
+  }
+
+  function run() {
+    var $ = function (s) { return document.querySelector(s); };
+    var $$ = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
+    var T = 'ruanoo-';    // 类名前缀
+    var EV = 'ruanoo:';   // 事件前缀
+
+    /* ---------- 下拉 ---------- */
+    var wrap = $('#t-select');
+    var display = wrap.querySelector('.ruanoo-custom-select-display');
+    var dropdown = wrap.querySelector('.ruanoo-custom-select-dropdown');
+    var opts = $$('#t-select .ruanoo-custom-select-option');
+    var picked = [];
+    wrap.addEventListener(EV + 'select-change', function (e) { picked.push(e.detail.value); });
+
+    display.click();
+    check('下拉：点击触发器展开',
+      dropdown.classList.contains(T + 'active') && display.getAttribute('aria-expanded') === 'true');
+
+    opts[1].click();
+    check('下拉：选中项转移 selected',
+      opts[1].classList.contains(T + 'selected') && !opts[0].classList.contains(T + 'selected'));
+    check('下拉：触发器文本同步',
+      display.querySelector('.ruanoo-custom-select-text').textContent.trim() === '浅色');
+    check('下拉：select-change 的 value 取自 data-ru-value',
+      picked.length === 1 && picked[0] === 'light', '收到 ' + JSON.stringify(picked));
+    check('下拉：选中后自动收起', !dropdown.classList.contains(T + 'active'));
+
+    display.click();
+    opts[2].click();
+    check('下拉：禁用项不可选、不派发事件',
+      picked.length === 1 && opts[2].getAttribute('aria-selected') === 'false');
+
+    document.body.click();
+    check('下拉：点击组件之外收起', !dropdown.classList.contains(T + 'active'));
+
+    display.focus();
+    key(display, 'ArrowDown');
+    check('下拉：方向键展开并聚焦首项',
+      dropdown.classList.contains(T + 'active') && document.activeElement === opts[0]);
+    key(dropdown, 'ArrowDown');
+    check('下拉：方向键在选项间移动', document.activeElement === opts[1]);
+    key(dropdown, 'Escape');
+    check('下拉：Escape 收起并把焦点还给触发器',
+      !dropdown.classList.contains(T + 'active') && document.activeElement === display);
+
+    /* ---------- 分段控件 ---------- */
+    var seg = $('#t-seg');
+    var segOpts = $$('#t-seg .ruanoo-theme-option');
+    var segEvents = [];
+    seg.addEventListener(EV + 'segment-change', function (e) { segEvents.push(e.detail.index); });
+
+    segOpts[1].click();
+    check('分段：位移类用 ruanoo-idx-1（不是 idx-1）',
+      seg.classList.contains(T + 'idx-1') && !seg.classList.contains('idx-1'),
+      'class="' + seg.className + '"');
+
+    segOpts[2].click();
+    check('分段：第三项 → ruanoo-idx-2',
+      seg.classList.contains(T + 'idx-2') && !seg.classList.contains(T + 'idx-1'),
+      'class="' + seg.className + '"');
+
+    segOpts[0].click();
+    check('分段：回到首项后不带任何 idx 位移类',
+      !seg.classList.contains(T + 'idx-1') && !seg.classList.contains(T + 'idx-2') &&
+      !seg.classList.contains('idx-1'),
+      'class="' + seg.className + '"');
+
+    check('分段：segment-change 的 index 递增正确',
+      segEvents.join(',') === '1,2,0', '收到 ' + segEvents.join(','));
+    check('分段：选中态是单选的',
+      segOpts[0].classList.contains(T + 'active') &&
+      !segOpts[1].classList.contains(T + 'active') &&
+      !segOpts[2].classList.contains(T + 'active'));
+
+    /* ---------- 预设卡片 ---------- */
+    var group = $('#t-preset');
+    var cards = $$('#t-preset .ruanoo-preset-card');
+    var presetEvents = [];
+    group.addEventListener(EV + 'preset-change', function (e) { presetEvents.push(e.detail.value); });
+
+    cards[2].click();
+    check('预设：位移类用 ruanoo-idx-2（不是 idx-2）',
+      group.classList.contains(T + 'idx-2') && !group.classList.contains('idx-2'),
+      'class="' + group.className + '"');
+    check('预设：卡片高亮与 preset-change 同步',
+      cards[2].classList.contains(T + 'active') && presetEvents[0] === 'c',
+      '事件 ' + JSON.stringify(presetEvents));
+
+    /* ---------- 列表选择项 ---------- */
+    var list = $('#t-manage');
+    var mOpts = $$('#t-manage .ruanoo-manage-option');
+    var mEvents = [];
+    list.addEventListener(EV + 'manage-select', function (e) { mEvents.push(e.detail.action); });
+
+    mOpts[1].click();
+    check('列表：aria-selected 单选转移',
+      mOpts[1].getAttribute('aria-selected') === 'true' &&
+      mOpts[0].getAttribute('aria-selected') === 'false');
+    check('列表：manage-select 的 action 取自 data-ru-action',
+      mEvents[0] === 'restore', '收到 ' + JSON.stringify(mEvents));
+
+    mOpts[1].focus();
+    key(mOpts[1], 'ArrowDown');
+    check('列表：方向键移动焦点并同步选中',
+      document.activeElement === mOpts[2] && mOpts[2].getAttribute('aria-selected') === 'true');
+
+    /* ---------- 弹窗 ---------- */
+    var openBtn = $('#t-open');
+    var overlay = $('#t-modal');
+    var dialog = overlay.querySelector('.ruanoo-modal-dialog');
+    openBtn.focus();
+    openBtn.click();
+
+    check('弹窗：打开并加 active', overlay.classList.contains(T + 'active'));
+    check('弹窗：role / aria-modal / aria-labelledby 就位',
+      dialog.getAttribute('role') === 'dialog' &&
+      dialog.getAttribute('aria-modal') === 'true' &&
+      !!dialog.getAttribute('aria-labelledby'));
+    check('弹窗：锁住背景滚动', document.body.classList.contains(T + 'modal-open'));
+    check('弹窗：焦点进入对话框', dialog.contains(document.activeElement));
+
+    key(document, 'Escape');
+    check('弹窗：Escape 关闭', !overlay.classList.contains(T + 'active'));
+    check('弹窗：关闭后焦点归还触发按钮',
+      document.activeElement === openBtn,
+      'activeElement = ' + (document.activeElement && (document.activeElement.id || document.activeElement.tagName)));
+    check('弹窗：解除背景锁定', !document.body.classList.contains(T + 'modal-open'));
+
+    /* ---------- 重复初始化 ---------- */
+    var before = picked.length;
+    window.RuanooUI.initAll();
+    window.RuanooUI.initAll();
+    display.click();
+    opts[1].click();
+    check('重复调用 initAll 不会叠加监听',
+      picked.length === before + 1, '事件次数 ' + before + ' → ' + picked.length);
+
+    report();
+  }
+
+  // 在 ruanoo-ui.js 的 initAll 之后执行
+  document.addEventListener('DOMContentLoaded', run);
+})();
+</script>
+</body>
+</html>

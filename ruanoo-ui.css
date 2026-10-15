@@ -1,0 +1,1242 @@
+/* ==========================================================================
+   RuanooUI — 组件样式库
+   --------------------------------------------------------------------------
+   纯 CSS 组件库：设计变量与组件规则，无依赖、无构建。
+
+   用法
+ 1. <link rel="stylesheet" href="ruanoo-ui.css">
+ 2. 深色主题：document.documentElement.dataset.ruTheme = 'dark'
+    （浅色用 data-ru-theme="light" 或去掉该属性）
+ 3. 所有颜色都挂在 :root 的 CSS 变量上，业务侧按需覆盖即可，
+    不必改本文件。
+
+   说明
+ · 开关组件依赖 @property 与 :has()，需要 Chrome 105+。
+ · 本文件只含组件样式，不含页面框架与全局 reset。
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. 设计变量
+   -------------------------------------------------------------------------- */
+
+/* 浅色（默认） */
+:root {
+  /* 1. 页面与浮层底色 */
+  --ru-fill-color: #f7f7f7;                     /* 页面主背景 */
+  --ru-fill-popup-color: #ffffff;               /* 下拉、菜单等浮层背景 */
+
+  /* 2. 前景与文字色 */
+  --ru-neutral-foreground-rest: #262626;        /* 主文本 */
+  --ru-neutral-foreground-secondary: #616161;   /* 次要文本 */
+  --ru-placeholder-color: #9b9b9b;              /* 输入框占位符 */
+
+  /* 3. 互动填充 */
+  --ru-neutral-fill-rest: rgba(0, 0, 0, 0.04);  /* 悬停 */
+  --ru-neutral-fill-hover: rgba(0, 0, 0, 0.08); /* 悬停加深 / 选中 */
+
+  /* 4. 强调色 */
+  --ru-accent-foreground-rest: #262320;         /* 主强调色 */
+  --ru-accent-foreground-hover: #3a3733;        /* 主强调色悬停 */
+  --ru-accent-foreground-invert: #f0f0f0;       /* 叠在强调色上的文字 */
+  --ru-btn-secondary-bg: #EEEEEE;               /* 次级按钮背景 */
+  --ru-btn-danger-color: #d13438;               /* 危险操作前景 */
+  --ru-btn-danger-hover: #fde8e8;               /* 危险操作悬停背景 */
+
+  /* 5. 阴影 */
+  --ru-shadow16: 0 0 2px rgba(0, 0, 0, 0.12), 0 8px 16px rgba(0, 0, 0, 0.14);
+  --ru-dropdown-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+
+  /* 6. 浮层层级：覆盖这四个变量即可整体调整堆叠顺序 */
+  --ru-z-modal: 1000;
+  --ru-z-dropdown: 2000;
+  --ru-z-panel: 2100;
+  --ru-z-menu: 2200;
+
+  /* 7. 弹窗与输入框 */
+  --ru-modal-bg: #ffffff;
+  --ru-modal-border: #e0e0e0;
+  --ru-modal-mask: rgba(0, 0, 0, 0.52);
+  --ru-input-bg: #F2F2F2;
+  --ru-input-border: #e8e8e8;                   /* 比 --ru-modal-border 再淡一档 */
+  --ru-input-border-focus: #808080;             /* 聚焦时明显加深，让焦点一眼可辨 */
+
+  /* 8. 卡片与设置面板 */
+  --ru-settings-card-bg: #ffffff;
+  --ru-settings-card-border: #d4d4d4;
+  --ru-settings-card-hover: #f9f9f9;
+  --ru-settings-text-primary: #1b1b1b;
+  --ru-settings-text-secondary: #707070;
+  --ru-settings-thumb-bg: #d5d9de;
+  --ru-settings-thumb-border: #d4d4d4;
+
+  /* 字体：组件一律继承上下文字体，此变量供使用方在 body 上引用 */
+  --ru-font-family: system-ui, -apple-system, 'Segoe UI', Roboto,
+'PingFang SC', 'Microsoft YaHei', Arial, sans-serif;
+}
+
+/* 深色（<html data-ru-theme="dark">） */
+:root[data-ru-theme="dark"] {
+  --ru-fill-color: #1f1f1f;
+  --ru-fill-popup-color: #2b2b2b;
+
+  --ru-neutral-foreground-rest: #f5f5f5;
+  --ru-neutral-foreground-secondary: #adadad;
+  --ru-placeholder-color: #8f8f8f;
+
+  --ru-neutral-fill-rest: rgba(255, 255, 255, 0.06);
+  --ru-neutral-fill-hover: rgba(255, 255, 255, 0.12);
+
+  --ru-shadow16: 0 0 2px rgba(0, 0, 0, 0.24), 0 8px 16px rgba(0, 0, 0, 0.28);
+  /* 深色下黑色阴影几乎不可见，需要更深的阴影叠加才能把浮层托起来 */
+  --ru-dropdown-shadow: 0 4px 14px rgba(0, 0, 0, 0.4), 0 1px 4px rgba(0, 0, 0, 0.22);
+
+  --ru-modal-bg: #242424;
+  --ru-modal-border: #454545;              /* 同时用作按钮悬停底色，需比 --ru-btn-secondary-bg 亮 */
+  --ru-modal-mask: rgba(0, 0, 0, 0.78);
+  --ru-input-bg: #202020;
+  --ru-input-border: #333333;              /* 外框比填充亮，否则看着像内凹 */
+  --ru-input-border-focus: #999999;
+  --ru-btn-danger-color: #ff6b6b;
+  --ru-btn-danger-hover: #3d1a1a;
+
+  --ru-accent-foreground-rest: #f0f0f0;
+  --ru-accent-foreground-hover: #E0E0E0;
+  --ru-accent-foreground-invert: #262320;
+  --ru-btn-secondary-bg: #3a3a3a;          /* 比卡片背景亮一档，与卡片区分 */
+
+  --ru-settings-card-bg: #2b2b2b;
+  --ru-settings-card-border: #3d3d3d;
+  --ru-settings-card-hover: #353535;
+  --ru-settings-text-primary: #e3e3e3;
+  --ru-settings-text-secondary: #9e9e9e;
+  --ru-settings-thumb-bg: #212121;
+  --ru-settings-thumb-border: #3d3d3d;
+}
+
+/* --------------------------------------------------------------------------
+   2. 组件
+   -------------------------------------------------------------------------- */
+
+/* 让自定义属性成为可过渡的 <length>；不注册的话它们是离散的，无法插值 */
+@property --ru-thumb-left {
+  syntax: '<length>';
+  inherits: true;
+  initial-value: 0px;
+}
+
+@property --ru-thumb-w {
+  syntax: '<length>';
+  inherits: true;
+  initial-value: 16px;
+}
+
+/* 统一进度值：0 = 完全关闭，1 = 完全打开。位置、宽度、渐隐全由它推导 */
+@property --ru-p {
+  syntax: '<number>';
+  inherits: true;
+  initial-value: 0;
+}
+
+/* ----------------------------------------------------------------------
+   组件内按钮基线
+   ----------------------------------------------------------------------
+   只作用于本库的按钮类，不碰使用方页面上的其它 <button>。用 :where() 把
+   特异性压到 0，因此每个组件自身的规则都能覆盖它。
+   ---------------------------------------------------------------------- */
+:where(
+  .ruanoo-btn,
+  .ruanoo-icon-btn-text,
+  .ruanoo-custom-select-display,
+  .ruanoo-theme-option,
+  .ruanoo-quicklink-menu-item,
+  .ruanoo-icon-preset-item
+) {
+  margin: 0;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: none;
+  box-shadow: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  /* 跟随使用方上下文的字体，组件不强制自己的字体栈 */
+  font-family: inherit;
+  transition: background-color 0.08s ease;
+}
+
+/* 键盘聚焦环。这里不再用 outline: none 抹掉焦点提示 */
+:where(
+  .ruanoo-btn,
+  .ruanoo-icon-btn-text,
+  .ruanoo-custom-select-display,
+  .ruanoo-theme-option,
+  .ruanoo-quicklink-menu-item,
+  .ruanoo-icon-preset-item
+):focus-visible {
+  outline: 2px solid var(--ru-accent-foreground-rest);
+  outline-offset: 2px;
+}
+
+/* 禁用态 */
+:where(.ruanoo-btn, .ruanoo-icon-btn-text):disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.ruanoo-settings-content {
+  padding: 0 12px 12px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* 设置卡片样式 */
+.ruanoo-settings-card {
+  background-color: var(--ru-settings-card-bg);
+  /* 纯平风格：去掉描边，靠卡片底色与面板底色的差异区分 */
+  border: none;
+  border-radius: 8px;
+  padding: 12px;
+  box-sizing: border-box;
+}
+
+.ruanoo-settings-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ru-settings-text-primary);
+}
+
+.ruanoo-settings-card-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ru-settings-text-primary);
+  margin-bottom: 8px;
+}
+
+/* ===== 重写下拉菜单样式 ===== */
+
+/* 自定义 select 外壳 —— 原生 select 透明覆盖用于接收键盘等原生事件 */
+.ruanoo-custom-select-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.ruanoo-custom-select-wrapper .ruanoo-select-box {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+  width: 100%;
+  height: 100%;
+  border: none;
+  background: transparent;
+}
+
+/* 下拉触发器按钮 —— 显示当前选中项文本和箭头 */
+/* 触发器里的文本：需要容纳"预置 + 图标" */
+.ruanoo-custom-select-text {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.ruanoo-custom-select-preset-icon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  display: block;
+}
+
+.ruanoo-custom-select-display {
+  width: 100%;
+  height: 32px;
+  border-radius: 6px;
+  /* 用透明描边保留 1px 几何，避免尺寸变化 */
+  border: 1px solid transparent;
+  background-color: var(--ru-btn-secondary-bg);
+  color: var(--ru-settings-text-primary);
+  padding: 0 12px 0 10px;
+  font-size: 13px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: background-color 0.08s ease, border-color 0.08s ease;
+  user-select: none;
+  box-sizing: border-box;
+}
+
+.ruanoo-custom-select-display:hover {
+  background-color: var(--ru-modal-border);
+}
+
+/* 没有描边可用了，展开状态改用底色加深来表示 */
+.ruanoo-custom-select-display.ruanoo-active {
+  background-color: var(--ru-modal-border);
+}
+
+/* 自定义下拉里不可选的项（例如"底部"模式下的"多行"）
+   注意不能用 pointer-events: none：那会让点击穿透到下层，反而触发"点击外部" */
+.ruanoo-custom-select-option.ruanoo-disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.ruanoo-custom-select-option.ruanoo-disabled:hover {
+  background-color: transparent;
+}
+
+/* 整条下拉不可用时（例如"显示搜索框/显示快速链接"关掉后，该选项已无意义） */
+.ruanoo-custom-select-display.ruanoo-disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+/* 下拉箭头旋转动画 */
+.ruanoo-custom-select-arrow {
+  width: 12px;
+  height: 12px;
+  flex-shrink: 0;
+  color: var(--ru-neutral-foreground-secondary);
+  transition: transform 0.08s ease;
+}
+
+.ruanoo-custom-select-display.ruanoo-active .ruanoo-custom-select-arrow {
+  transform: rotate(180deg);
+}
+
+/* 下拉面板 —— position:fixed 用于脱离父容器 overflow 裁剪
+   - 初始状态：opacity:0, visibility:hidden, transform 上移 4px
+   - .ruanoo-active 状态：opacity:1, visibility:visible, transform 归零
+   - 展开方向由 JS 根据空间动态决定（上/下），通过 translateY 初始方向实现动画 */
+.ruanoo-custom-select-dropdown {
+  position: fixed;
+  background-color: var(--ru-fill-popup-color);
+  /* 纯平风格：去掉描边，靠 box-shadow 与背景色区分层次；
+     保留 1px 透明边框是为了维持尺寸（该元素是 content-box） */
+  border: 1px solid transparent;
+  border-radius: 6px;
+  box-shadow: var(--ru-dropdown-shadow);
+  z-index: var(--ru-z-dropdown);
+  max-height: 260px;
+  overflow-y: auto;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateY(-4px);
+  transition: opacity 0.08s ease-out, transform 0.08s ease-out, visibility 0s linear 0.08s;
+}
+
+.ruanoo-custom-select-dropdown.ruanoo-active {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translateY(0);
+  transition: opacity 0.08s ease-out, transform 0.08s ease-out;
+}
+
+/* 空间不足时脚本改成向上展开，入场方向随之翻转 */
+.ruanoo-custom-select-dropdown.ruanoo-drop-up {
+  transform: translateY(4px);
+}
+
+.ruanoo-custom-select-dropdown.ruanoo-drop-up.ruanoo-active {
+  transform: translateY(0);
+}
+
+/* 选项样式 */
+.ruanoo-custom-select-option {
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--ru-settings-text-primary);
+  transition: background-color 0.08s ease, color 0.08s ease;
+}
+
+.ruanoo-custom-select-option:hover {
+  background-color: var(--ru-neutral-fill-hover);
+}
+
+.ruanoo-custom-select-option.ruanoo-selected {
+  color: var(--ru-accent-foreground-rest);
+  font-weight: 600;
+}
+
+.ruanoo-setting-status-text {
+  font-size: 12px;
+  color: var(--ru-settings-text-secondary);
+  margin-right: 8px;
+}
+
+.ruanoo-switch-container {
+  display: flex;
+  align-items: center;
+}
+
+/* 滑块开关样式 */
+.ruanoo-switch {
+  position: relative;
+  display: inline-block;
+  /* 进度值驱动一切。下面两个位置/宽度由它算出，
+     所以过渡中任何一帧的间隙都精确等于 2px */
+  --ru-p: 0;
+  /* 打开态手柄：左边缘 25px、宽 5px → 右边缘正好 30px（贴住控件右边，不被裁） */
+  --ru-thumb-left: calc(var(--ru-p) * 25px);
+  --ru-thumb-w: calc(16px - var(--ru-p) * 11px);
+  /* 左半边宽度：右边界 = 手柄左边缘 − 2，可见期间间隙恒为 2px */
+  --ru-lw: max(0px, calc(var(--ru-thumb-left) - 2px));
+  /* 右半边宽度：左边界 = 手柄右边缘 + 2，间隙同样恒为 2px */
+  --ru-rw: max(0px, calc(28px - var(--ru-thumb-left) - var(--ru-thumb-w)));
+  width: 30px;                 /* 28 → 30：让半胶囊放得下"半圆 + 小圆角" */
+  height: 16px;                /* 高度略降（原 18px） */
+  transition: --ru-p 0.2s ease;
+  /* 兜底：任何元素都不越出控件范围 */
+  overflow: hidden;
+}
+
+.ruanoo-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+/* ===== 抽象开关：左半边胶囊 + 手柄 + 右半边胶囊 =====
+   三个形状横向排布。手柄左右滑动时，一侧的半边胶囊收窄、另一侧伸展；
+   两半都只让"平直端"移动，大端（半圆）固定不动，所以两端弧度与圆角
+   全程不变 —— 看上去就是"胶囊被缩短 / 伸长"。
+   宽度下限 11px ＝ 大端半径 8 + 平直端圆角 3，低于它圆角会被等比缩小。
+   两张半边各自只圆外侧的角，合起来正好是一个胶囊。 */
+
+/* 点击层：填满控件、完全透明，只负责接收点击 */
+.ruanoo-slider {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  cursor: pointer;
+}
+
+/* 左半边胶囊：左圆右直。左端固定，只缩右端；最小 11px（＝两端半径之和） */
+.ruanoo-switch::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  background-color: var(--ru-accent-foreground-rest);
+  /* 斜杠前是水平半径、后是垂直半径。
+     垂直半径固定 8px / 3px，所以宽度足够时外观不变；
+     水平半径随宽度收窄，使两端之和始终不超过宽度 ——
+     这样只有横向被压缩，圆端的纵向弧度不会被压扁、不会坍缩成一条线 */
+  border-radius:
+    min(8px, var(--ru-lw)) min(3px, max(0px, var(--ru-lw) - 8px))
+    min(3px, max(0px, var(--ru-lw) - 8px)) min(8px, var(--ru-lw))
+    / 8px 3px 3px 8px;
+  /* 左端固定，只让右端随宽度伸缩 —— 大端不会被推出裁掉。
+     最小 11px 是两端半径之和（8+3），再小圆角就会被等比缩小 */
+  left: 0;
+  /* 右边界 = 手柄左边缘 − 2，于是间隙恒为 2px。
+     关闭时算出 −2px，被 max() 取 0 → 宽度归零，不残留像素 */
+  width: var(--ru-lw);
+  /* 只在"圆角与圆端相接"（宽度 11px）之后渐隐：
+       p ≥ 0.5        （宽度 ≥ 11px）→ 1，完整显示
+       p 0.375 ~ 0.5  （宽度 7.75 ~ 11px）→ 1 → 0，渐隐
+       p ≤ 0.375      （宽度 ≤ 7.75px）→ 0
+     所以收缩时前段是纯缩短，只在末段淡出。 */
+  opacity: clamp(0, (var(--ru-p) - 0.375) * 8, 1);
+}
+
+/* 右半边胶囊：左直右圆。右端固定，只缩左端；最小 11px（＝两端半径之和） */
+.ruanoo-switch::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  /* 右端固定，宽度伸缩 —— 与左半边对称，大端不会被推出裁掉。
+     宽度 = 12px − p×14，恰好使左边界 = 手柄右边缘 + 2，间隙恒为 2px */
+  right: 0;
+  width: var(--ru-rw);
+  background-color: var(--ru-settings-card-border);
+  /* 斜杠前是水平半径、后是垂直半径。
+     垂直半径固定 3px / 8px，宽度足够时外观不变；
+     水平半径随宽度收窄，两端之和始终不超过宽度 ——
+     这样只压横向，圆端的纵向弧度不会被压扁、不会坍缩成线 */
+  border-radius:
+    min(3px, max(0px, var(--ru-rw) - 8px)) min(8px, var(--ru-rw))
+    min(8px, var(--ru-rw)) min(3px, max(0px, var(--ru-rw) - 8px))
+    / 3px 8px 8px 3px;
+  /* 与左半边镜像对称的末段渐隐 */
+  opacity: clamp(0, (0.625 - var(--ru-p)) * 8, 1);
+  transition: background-color 0.2s ease;
+}
+
+/* 手柄：关闭态＝空心圆环，位于左端 */
+.ruanoo-slider::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: var(--ru-thumb-left);
+  width: var(--ru-thumb-w);
+  height: 16px;
+  /* 环用内阴影画：border 会参与布局，在竖线那种极窄宽度下把元素撑宽。
+     环心保持透明（真正镂空）：悬停时的 filter: brightness() 只影响有色像素，
+     所以环心不会跟着变色；下面也没有任何需要遮挡的底色 */
+  background-color: transparent;
+  /* 环壁 4px，与打开态竖线的宽度一致；16px 外径 → 内径 8px */
+  box-shadow: inset 0 0 0 4px var(--ru-settings-card-border);
+  border-radius: 50%;
+  /* left / width 由 --ru-thumb-left / --ru-thumb-w 驱动，已在 .ruanoo-switch 上插值，
+     这里不能再加过渡，否则同一个变化会被叠加两次 */
+  transition: box-shadow 0.2s ease, background-color 0.2s ease, border-radius 0.2s ease;
+}
+
+/* 悬停时整个开关一起变色（三个形状都在 .ruanoo-switch 内，filter 会作用于全部） */
+.ruanoo-switch:hover {
+  filter: brightness(0.94);
+}
+
+/* ===== 打开态 ===== */
+.ruanoo-switch:has(input:checked) {
+  /* 打开：进度推到 1，手柄位置/宽度、两半胶囊宽度随之全部到位 */
+  --ru-p: 1;
+}
+
+.ruanoo-switch:has(input:checked) .ruanoo-slider::before {
+  /* 位置与宽度已由变量驱动，这里只负责"圆环 → 圆头竖线"的形状变化 */
+  box-shadow: inset 0 0 0 0 var(--ru-accent-foreground-rest);
+  background-color: var(--ru-accent-foreground-rest);
+  border-radius: 999px;
+}
+
+/* 卡片视图选择器 */
+/* 主题模式：连体滑块（跟随系统 / 浅色 / 深色） */
+.ruanoo-theme-switch {
+  position: relative;
+  display: flex;
+  gap: 2px;
+  padding: 3px;                              /* 选中块与凹槽之间的缝隙 */
+  /* 纯平风格：不要描边，靠凹槽底色与卡片底色区分。
+     仍用透明描边占位，保证内部尺寸（滑块定位依赖它）不变 */
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background-color: var(--ru-input-bg);        /* 凹槽底色 */
+}
+
+/* 滑块：由 idx-N 类驱动位移，切换时平滑滑动
+   （宽度 = (100% − 2×3 padding − 2×2 gap) / 3） */
+.ruanoo-theme-switch::before {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: calc((100% - 10px) / 3);
+  height: calc(100% - 6px);
+  border-radius: 3px;                        /* 容器 6px − padding 3px */
+  /* 纯平风格：靠滑块自身的浅色底与凹槽区分，不用投影 */
+  background-color: var(--ru-settings-card-bg);
+  transform: translateX(0);
+  transition: transform 0.1s ease;
+  pointer-events: none;
+}
+
+.ruanoo-theme-switch.ruanoo-idx-1::before {
+  transform: translateX(calc(100% + 2px));
+}
+
+.ruanoo-theme-switch.ruanoo-idx-2::before {
+  transform: translateX(calc(200% + 4px));
+}
+
+.ruanoo-theme-option {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  min-width: 0;              /* 关键：不允许长文本把 flex 项撑得比 1/3 宽 */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  height: 30px;          /* 30 + 2×2(padding) + 2×1(边框) = 36px，整控件高度 */
+  padding: 0 3px;
+  border: none;
+  border-radius: 3px;     /* 外层 6px − padding 3px */
+  background-color: transparent;
+  color: var(--ru-settings-text-primary);
+  font-family: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  transition: border-color 0.08s, background-color 0.08s;
+}
+
+/* 选中态的背景由 .ruanoo-theme-switch::before 那块滑块承担 */
+.ruanoo-theme-option.ruanoo-active {
+  font-weight: 600;
+}
+
+/* 长文案（俄语等）不被截断：JS 量出溢出距离后，内层文字来回平移。
+   裁切窗口只框住文字本身（不含图标），所以滚动时可见范围始终是这块固定区域 */
+.ruanoo-theme-option-label {
+  min-width: 0;
+  overflow: hidden;
+}
+
+.ruanoo-theme-option-label-inner {
+  display: inline-block;
+  white-space: nowrap;
+  /* 溢出距离，由脚本按实际文字宽度写入 */
+  --ru-label-shift: 0px;
+}
+
+.ruanoo-theme-option-label-inner.ruanoo-overflowing {
+  animation: ruanoo-label-scroll 5.71s linear infinite;   /* 35% ≈ 2s 停顿 */
+}
+
+.ruanoo-theme-option svg {
+  flex-shrink: 0;
+}
+
+/* 预设区的小标题 */
+.ruanoo-preset-section-label {
+  margin-top: 14px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ru-settings-text-secondary);
+}
+
+.ruanoo-layout-presets {
+  position: relative;
+  display: flex;
+  gap: 2px;
+  padding: 3px;                              /* 与主题模式一致的缝隙 */
+  /* 纯平风格：与主题模式同一套处理，透明描边只为占位 */
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background-color: var(--ru-input-bg);
+  margin-top: 10px;
+}
+
+/* 预设的滑块：与主题模式同一套（容器 6px − padding 3px = 3px 圆角） */
+.ruanoo-layout-presets::before {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: calc((100% - 10px) / 3);
+  height: calc(100% - 6px);
+  border-radius: 3px;
+  /* 纯平风格：不用投影 */
+  background-color: var(--ru-settings-card-bg);
+  transform: translateX(0);
+  transition: transform 0.1s ease, opacity 0.15s ease;
+  pointer-events: none;
+}
+
+.ruanoo-layout-presets.ruanoo-idx-1::before {
+  transform: translateX(calc(100% + 2px));
+}
+
+.ruanoo-layout-presets.ruanoo-idx-2::before {
+  transform: translateX(calc(200% + 4px));
+}
+
+/* 当前配置和三个预设都不一致时不显示滑块 */
+.ruanoo-layout-presets.ruanoo-no-thumb::before {
+  opacity: 0;
+}
+
+.ruanoo-preset-card {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  min-width: 0;
+  border: none;
+  background-color: transparent;
+  border-radius: 3px;     /* 外层 6px − padding 3px */
+  padding: 6px;              /* 上/左/右等宽：图案到边框的留白一致且稍大 */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: border-color 0.08s, background-color 0.08s;
+}
+
+/* 悬停一律"加深"：未选中项叠一层黑 */
+.ruanoo-theme-option:hover,
+.ruanoo-preset-card:hover {
+  background-color: rgba(0, 0, 0, 0.04);
+}
+
+/* 已选中项不参与上面的叠黑（背景由滑块承担，叠黑会盖在滑块上显得变色） */
+.ruanoo-theme-option.ruanoo-active:hover,
+.ruanoo-preset-card.ruanoo-active:hover {
+  background-color: transparent;
+}
+
+/* 选中态的背景由 .ruanoo-layout-presets::before 承担 */
+.ruanoo-preset-card.ruanoo-active {
+  font-weight: 600;
+}
+
+.ruanoo-preset-thumb {
+  width: 100%;
+  height: 48px;
+  border-radius: 4px;
+  background-color: var(--ru-settings-thumb-bg);
+  border: 1px solid var(--ru-settings-thumb-border);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.ruanoo-preset-thumb-box {
+  position: absolute;
+  bottom: 6px;
+  width: 60%;
+  height: 4px;
+  background: rgba(128, 128, 128, 0.55);
+  border-radius: 2px;
+  z-index: 1;
+}
+
+/* 预设缩略图里的小长方形（Logo 占位） */
+.ruanoo-preset-thumb-logo {
+  position: absolute;
+  width: 30%;
+  height: 8px;
+  border-radius: 2px;
+  background: rgba(128, 128, 128, 0.55);
+  z-index: 1;
+}
+
+/* 预设缩略图里的一排圆点：整体宽度与上面的条条一致 */
+.ruanoo-preset-thumb-dots {
+  position: absolute;
+  width: 60%;
+  height: 10px;              /* 与原粗条等高，方便用同样的位置摆放 */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.ruanoo-preset-thumb-dots span {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: rgba(128, 128, 128, 0.55);
+}
+
+.ruanoo-preset-card-label {
+  font-size: 11px;
+  color: var(--ru-settings-text-primary);
+  text-align: center;
+}
+
+/* 图标按钮 */
+.ruanoo-icon-btn-text {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  height: 32px;
+  /* 纯平风格：与"选择文件""恢复默认"等次级按钮同款灰底，无描边 */
+  border: 1px solid transparent;
+  background-color: var(--ru-btn-secondary-bg);
+  color: var(--ru-settings-text-primary);
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: pointer;
+  margin-top: 8px;
+  transition: background-color 0.08s ease;
+}
+
+/* 底部链接样式 */
+.ruanoo-settings-footer {
+  /* 上内边距留 0：上方留白由 .ruanoo-settings-content 的 padding-bottom 提供 */
+  padding: 0 16px 16px 16px;
+  font-size: 11px;
+  color: var(--ru-settings-text-secondary);
+  line-height: 1.6;
+}
+
+.ruanoo-settings-footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 6px;
+  margin-bottom: 12px;     /* 版本/署名行与链接行之间的间距 */
+}
+
+.ruanoo-settings-footer-links a {
+  color: var(--ru-settings-text-secondary);
+  text-decoration: none;
+}
+
+.ruanoo-settings-footer-links a:hover {
+  text-decoration: underline;
+}
+
+/* 页脚下面两行（链接行 + 免责声明）统一成次要色并整体调淡。
+   相邻兄弟选择器只命中第二个 .ruanoo-settings-footer-links，也就是链接行，
+   第一行的版本 / 署名行不受影响。
+   链接行的下边距由 8px 收到 4px，让这两行靠紧一些
+   （相邻块级元素的 margin 会折叠，实际间距取两者中的较大值）。 */
+.ruanoo-settings-footer-links + .ruanoo-settings-footer-links {
+  color: var(--ru-settings-text-secondary);
+  opacity: 0.7;
+  margin-bottom: 2px;
+}
+
+.ruanoo-settings-footer-text {
+  color: var(--ru-settings-text-secondary);
+  opacity: 0.7;
+  /* 上边距与链接行的下边距一起决定折叠结果（取较大值），所以必须同步收到 2px */
+  margin: 2px 0;
+}
+
+/* ===== 快速链接的右键菜单 ===== */
+.ruanoo-quicklink-menu {
+  position: fixed;
+  z-index: var(--ru-z-menu);       /* 高于下拉浮层与图标面板 */
+  display: none;
+  min-width: 152px;
+  padding: 4px;
+  /* 纯平风格：与自定义下拉浮层统一，去掉描边，层次交给 box-shadow */
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background-color: var(--ru-fill-popup-color);
+  box-shadow: var(--ru-dropdown-shadow);
+}
+
+.ruanoo-quicklink-menu.ruanoo-active {
+  display: block;
+}
+
+.ruanoo-quicklink-menu-item {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;   /* 图标与文字一律靠左 */
+  gap: 10px;
+  width: 100%;
+  padding: 7px 10px;
+  box-sizing: border-box;
+  border: none;
+  border-radius: 4px;
+  background-color: transparent;
+  color: var(--ru-settings-text-primary);
+  font-size: 13px;
+  text-align: left;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color 0.08s ease;
+}
+
+.ruanoo-quicklink-menu-item svg {
+  width: 18px;
+  height: 18px;                  /* 定宽，保证各项文字左边缘对齐 */
+  flex-shrink: 0;
+  display: block;
+}
+
+.ruanoo-quicklink-menu-item:hover {
+  background-color: var(--ru-neutral-fill-hover);
+}
+
+/* 通用 Modal 模态对话框 */
+.ruanoo-modal-overlay {
+  display: flex;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: var(--ru-modal-mask);
+  z-index: var(--ru-z-modal);
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.08s ease-out, visibility 0s linear 0.08s;
+}
+
+.ruanoo-modal-overlay.ruanoo-active {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transition: opacity 0.08s ease-out, visibility 0s linear 0s;
+}
+
+.ruanoo-modal-dialog {
+  background-color: var(--ru-modal-bg);
+  /* 纯平风格：去掉描边，层次由 box-shadow: var(--ru-shadow16) 承担 */
+  border: 1px solid transparent;
+  border-radius: 8px;
+  width: 420px;
+  max-width: 90vw;
+  padding: 24px;
+  box-sizing: border-box;
+  box-shadow: var(--ru-shadow16);
+  color: var(--ru-neutral-foreground-rest);
+  font-family: inherit;
+  position: relative;
+}
+
+.ruanoo-modal-header {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.ruanoo-form-group {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 16px;
+}
+
+/* 弹窗里的两列排布（图标 + 名称） */
+.ruanoo-form-row {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.ruanoo-form-row > .ruanoo-form-group {
+  flex: 1;
+  min-width: 0;
+}
+
+.ruanoo-form-row > .ruanoo-form-group-narrow {
+  flex: 0 0 34%;
+}
+
+/* 弹窗里的下拉要与输入框同高、同圆角（.ruanoo-input 是 36px / 6px 圆角） */
+.ruanoo-form-row .ruanoo-custom-select-display {
+  height: 36px;
+  border-radius: 6px;
+}
+
+/* ===== 「预置」图标：二级宫格面板（5 列 × 7 行 = 35 个） ===== */
+.ruanoo-icon-preset-panel {
+  position: fixed;                 /* 由脚本定位到下拉项右侧，不受弹窗 overflow 裁剪 */
+  z-index: var(--ru-z-panel);      /* 盖过下拉浮层 */
+  display: none;
+  gap: 12px;                       /* 左侧实心组 / 右侧描边组之间的间距 */
+  padding: 8px;
+  /* 与自定义下拉浮层同款：去掉描边，靠 box-shadow 区分层次 */
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background-color: var(--ru-fill-popup-color);      /* 与自定义下拉浮层同底色 */
+  box-shadow: var(--ru-dropdown-shadow);
+}
+
+.ruanoo-icon-preset-panel.ruanoo-active {
+  display: flex;
+}
+
+/* 每组 5 列 × 7 行：左为实心（filled），右为描边（regular） */
+.ruanoo-icon-preset-group {
+  display: grid;
+  grid-template-columns: repeat(5, 32px);
+  gap: 4px;
+}
+
+.ruanoo-icon-preset-item {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: none;
+  border-radius: 4px;
+  background-color: transparent;
+  color: var(--ru-settings-text-primary);
+  cursor: pointer;
+  transition: background-color 0.08s ease;
+}
+
+.ruanoo-icon-preset-item:hover {
+  background-color: var(--ru-neutral-fill-rest);      /* 悬停：浅 */
+}
+
+.ruanoo-icon-preset-item.ruanoo-selected {
+  background-color: var(--ru-neutral-fill-hover);     /* 已选中：更深一档 */
+  color: var(--ru-accent-foreground-rest);
+}
+
+.ruanoo-icon-preset-item svg {
+  width: 20px;
+  height: 20px;
+  display: block;
+  pointer-events: none;
+}
+
+.ruanoo-form-label {
+  font-size: 13px;
+  font-weight: 500;
+  margin-bottom: 6px;
+  color: var(--ru-neutral-foreground-rest);
+}
+
+.ruanoo-input-container {
+  border-radius: 6px;        /* 与按钮 / 下拉框一致的圆角 */
+  overflow: hidden;    /*兜底：子元素不越出圆角*/
+  position: relative;
+  width: 100%;
+}
+
+.ruanoo-input {
+  width: 100%;
+  height: 36px;
+  border-radius: 6px;
+  /* 描边比其它控件略粗（3px），颜色用最淡的一档（比 --ru-modal-border 还浅） */
+  border: 3px solid var(--ru-input-border);
+  background-color: var(--ru-settings-card-hover);
+  color: var(--ru-neutral-foreground-rest);
+  padding: 0 10px;
+  font-size: 14px;
+  outline: none;
+  box-sizing: border-box;
+  transition: background-color 0.08s, border-color 0.08s, box-shadow 0.08s;
+}
+
+/* 占位符弱化一档：默认值是浏览器给的偏深灰，这里改用专门的占位符色再压透明 */
+.ruanoo-input::placeholder {
+  color: var(--ru-placeholder-color);
+  opacity: 0.75;
+}
+
+/* 悬停变色(选中时不生效)：:hover 特异性本就更高，不需要 !important */
+.ruanoo-input:hover:not(:focus) {
+  background-color: var(--ru-input-bg);
+}
+
+.ruanoo-input:focus {
+  /* 聚焦时只换描边颜色（更黑 / 更白），粗细由常规态统一决定。
+     颜色用专用变量，避免抬高特异性而盖过错误态。 */
+  border-color: var(--ru-input-border-focus);
+}
+
+/* 错误态：整圈描边换成警示色 */
+.ruanoo-input-container.ruanoo-error .ruanoo-input {
+  border-color: var(--ru-btn-danger-color);
+}
+
+.ruanoo-error-tip {
+  font-size: 12px;
+  color: var(--ru-btn-danger-color);
+  margin-top: 5px;
+  display: none;
+  align-items: center;
+  gap: 4px;
+  line-height: 1.3;
+  animation: ruanoo-slide-down-error 0.15s ease-out;
+}
+
+.ruanoo-error-tip.ruanoo-active {
+  display: flex;
+}
+
+.ruanoo-modal-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 24px;
+}
+
+.ruanoo-modal-footer-right {
+  display: flex;
+  gap: 12px;
+  margin-left: auto;
+}
+
+.ruanoo-btn {
+  height: 32px;
+  padding: 0 20px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.08s ease, filter 0.08s ease;
+}
+
+/* 强调按钮样式 */
+.ruanoo-btn-primary {
+  background-color: var(--ru-accent-foreground-rest);
+  color: var(--ru-accent-foreground-invert);
+  border: 1px solid transparent;
+   
+}
+
+.ruanoo-btn-primary:hover {
+  background-color: var(--ru-accent-foreground-hover);
+  filter: none;
+}
+
+/* 次级按钮样式 */
+.ruanoo-btn-secondary {
+  background-color: var(--ru-btn-secondary-bg);
+  color: var(--ru-neutral-foreground-rest);
+}
+
+.ruanoo-btn-secondary:hover {
+  background-color: var(--ru-modal-border);
+}
+
+.ruanoo-btn-danger {
+  background-color: transparent;
+  color: var(--ru-btn-danger-color);
+  border: 1px solid transparent;
+}
+
+.ruanoo-btn-danger:hover {
+  background-color: var(--ru-btn-danger-hover);
+}
+
+.ruanoo-file-input-hidden {
+  display: none;
+}
+
+/* ===== 管理配置文件：操作选择列表 ===== */
+.ruanoo-manage-list-hint {
+  margin: 0 0 10px 0;
+  font-size: 13px;
+  color: var(--ru-settings-text-secondary);
+}
+
+.ruanoo-manage-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ruanoo-manage-option {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 12px 11px 22px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background-color: transparent;
+  color: var(--ru-settings-text-primary);
+  font-size: 14px;
+  cursor: pointer;
+  user-select: none;
+  outline: none;
+  transition: background-color 0.08s ease, border-color 0.08s ease;
+}
+
+/* 悬停用较淡的一档 */
+.ruanoo-manage-option:hover {
+  background-color: var(--ru-neutral-fill-rest);
+}
+
+/* 选中态：用更明显的一档，保证"当前选择"比临时划过更突出（深浅主题都成立）；
+   这条写在 :hover 之后且特异性相同，所以选中项被划过时仍保持选中色 */
+.ruanoo-manage-option[aria-selected="true"] {
+  background-color: var(--ru-neutral-fill-hover);
+}
+
+/* 左侧选中指示条 */
+.ruanoo-manage-option::before {
+  content: '';
+  position: absolute;
+  left: 7px;
+  top: 50%;
+  width: 3px;
+  height: 18px;
+  border-radius: 2px;
+  background-color: var(--ru-accent-foreground-rest);
+  transform: translateY(-50%) scaleY(0);
+  transition: transform 0.1s ease;
+}
+
+.ruanoo-manage-option[aria-selected="true"]::before {
+  transform: translateY(-50%) scaleY(1);
+}
+
+/* 聚焦时使用外描边 */
+.ruanoo-manage-option:focus-visible {
+  outline: 2px solid var(--ru-accent-foreground-rest);
+  outline-offset: -2px;
+}
+
+.ruanoo-manage-option svg {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  color: var(--ru-settings-text-primary);
+}
+
+.ruanoo-manage-option-label {
+  line-height: 1.25;
+}
+
+/* --------------------------------------------------------------------------
+   3. 动效偏好
+   --------------------------------------------------------------------------
+   系统开启「减少动态效果」时，关闭滑块位移等过渡。
+   -------------------------------------------------------------------------- */
+
+/* 弹窗打开时锁住背景滚动 */
+body.ruanoo-modal-open {
+  overflow: hidden;
+}
+
+/* --------------------------------------------------------------------------
+   3. 关键帧
+   -------------------------------------------------------------------------- */
+
+/* 分段控件长文案：两端各作停顿，中间来回平移。
+   位移量由脚本写入 --ru-label-shift */
+@keyframes ruanoo-label-scroll {
+  0%, 35%   { transform: translateX(0); }
+  50%, 85%  { transform: translateX(var(--ru-label-shift, 0px)); }
+  100%      { transform: translateX(0); }
+}
+
+/* 校验提示的下拉展开 */
+@keyframes ruanoo-slide-down-error {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* --------------------------------------------------------------------------
+   4. 动效偏好
+   --------------------------------------------------------------------------
+   系统开启「减少动态效果」时，关掉位移过渡与循环动画。
+   -------------------------------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .ruanoo-theme-switch::before,
+  .ruanoo-layout-presets::before,
+  .ruanoo-custom-select-dropdown,
+  .ruanoo-modal-overlay,
+  .ruanoo-switch,
+  .ruanoo-switch::before,
+  .ruanoo-switch::after,
+  .ruanoo-slider::before {
+    transition: none;
+  }
+
+  .ruanoo-theme-option-label-inner.ruanoo-overflowing,
+  .ruanoo-error-tip {
+    animation: none;
+  }
+}

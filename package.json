@@ -1,0 +1,29 @@
+{
+  "name": "ruanoo-ui",
+  "version": "1.0.0",
+  "description": "轻量的纯 CSS 组件库：零依赖、无构建，浅色 / 深色双主题，类名与变量均带命名空间",
+  "license": "Apache-2.0",
+  "style": "ruanoo-ui.css",
+  "main": "ruanoo-ui.js",
+  "files": [
+    "ruanoo-ui.css",
+    "ruanoo-ui.js",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "audit": "node tools/audit.mjs --strict"
+  },
+  "keywords": [
+    "css",
+    "ui",
+    "components",
+    "design-system",
+    "theme",
+    "dark-mode",
+    "no-build"
+  ],
+  "sideEffects": [
+    "*.css"
+  ]
+}
