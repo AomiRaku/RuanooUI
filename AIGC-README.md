@@ -149,32 +149,56 @@ document.documentElement.dataset.ruTheme = 'dark';
   <input class="ruanoo-input" value="bad">
 </div>
 <div class="ruanoo-error-tip ruanoo-active"><svg/><span>请输入有效 URL</span></div>
+
+<!-- 禁用 -->
+<div class="ruanoo-input-container">
+  <input class="ruanoo-input" value="https://example.com" disabled>
+</div>
 ```
 
-高 36px、描边 3px。聚焦时只换描边颜色，粗细不变；错误态给容器加 `.ruanoo-error`，并给提示加 `.ruanoo-active`。
+高 36px、描边 3px。聚焦时只换描边颜色，粗细不变；错误态给容器加 `.ruanoo-error`，并给提示加 `.ruanoo-active`；给 `<input>` 加 `disabled` 进入禁用态——降对比、指针变为 `not-allowed`，且不再响应悬停。
 
 ### 开关
 
 ```html
 <div class="ruanoo-switch-container">
   <span class="ruanoo-setting-status-text">关闭</span>
-  <label class="ruanoo-switch ruanoo-switch-standard">
+  <label class="ruanoo-switch ruanoo-switch-classic">
     <input type="checkbox">
     <span class="ruanoo-slider"></span>
   </label>
 </div>
+
+<!-- 状态文字是可选的，开关可以单独使用 -->
+<label class="ruanoo-switch ruanoo-switch-classic">
+  <input type="checkbox">
+  <span class="ruanoo-slider"></span>
+</label>
+
+<!-- 禁用 -->
+<label class="ruanoo-switch ruanoo-switch-classic">
+  <input type="checkbox" disabled>
+  <span class="ruanoo-slider"></span>
+</label>
 ```
 
 ![开关](preview-switch.png)
 
-基类 `.ruanoo-switch` 提供尺寸与驱动逻辑，必须搭配下面两个变体类之一：
+基类 `.ruanoo-switch` 提供尺寸与驱动逻辑，必须搭配下面三个变体类之一：
 
 | 变体 | 形态 |
 | --- | --- |
-| `.ruanoo-switch-standard` | **常规**。宽 26px，手柄是一根固定 5px 宽的圆头竖线；两半胶囊高 13px、垂直居中；悬停整体降到 70% 不透明度 |
+| `.ruanoo-switch-classic` | **经典**。30 × 17px 的胶囊轨道 + 直径 13px 的圆形手柄；手柄缩放 0.5（关）→ 0.85（开），悬停时再放大到 1.25 倍；轨道底色随状态与悬停变化 |
+| `.ruanoo-switch-standard` | **常规**。宽 26px；手柄是一根固定 5px 宽的圆头竖线，只移动与换色；两半胶囊高 13px、垂直居中；悬停整体降到 70% 不透明度 |
 | `.ruanoo-switch-unique` | **独特**。宽 30px，两半胶囊撑满 16px 高；手柄关闭态是空心圆环、打开态收成竖线；悬停用亮度变化 |
 
-两者结构相同：`.ruanoo-switch::before` 是左半胶囊、`.ruanoo-slider::before` 是手柄、`.ruanoo-switch::after` 是右半胶囊。位置与宽度全部由可过渡变量 `--ru-p`（0 → 1）推导，因此滑动全程手柄与两侧胶囊的间隙恒为 2px；两半胶囊的圆角采用「垂直半径固定 + 水平半径随宽度收窄」的写法，收缩时弧度不会被压扁。
+`.ruanoo-switch-container` 只是把开关与其后的 `.ruanoo-setting-status-text` 横向排在一起；不需要时可以省掉——开关本身是 `inline-block`，能直接嵌进任意行内。禁用时给 `input` 加 `disabled`，两个变体都会整体降到 50% 不透明度并把指针改为 `not-allowed`。
+
+三者都以 `.ruanoo-slider` 作为交互层，由可过渡变量 `--ru-p`（0 → 1）驱动：
+
+- **经典**：`.ruanoo-slider` 是铺满控件的胶囊轨道，`.ruanoo-slider::before` 是直径 `--ru-thumb-w`（13px）的圆形手柄。位移量由 `--ru-thumb-start`、`--ru-thumb-end` 与 `--ru-thumb-travel` 决定，两端位置可独立调整。
+- **常规**：`.ruanoo-switch::before` 是左半胶囊、`.ruanoo-slider::before` 是固定 5px 宽的手柄、`.ruanoo-switch::after` 是右半胶囊；两半胶囊高 13px 并垂直居中。
+- **独特**：结构与常规相同，但两半胶囊撑满 16px 高；手柄关闭态是空心圆环、打开态收成竖线。滑动全程手柄与两侧胶囊的间隙恒为 2px，两半胶囊的圆角采用「垂直半径固定 + 水平半径随宽度收窄」的写法，收缩时弧度不会被压扁。
 
 实现拖动时，在拖动期间给 `.ruanoo-switch` 加上 `.ruanoo-switch-dragging`：它会关掉过渡并换成抓取光标，避免 `--ru-p` 逐帧写入时手柄滞后。
 

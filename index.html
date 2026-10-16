@@ -6,14 +6,14 @@
 <title>RuanooUI — 组件示例</title>
 <link rel="stylesheet" href="ruanoo-ui.css">
 <script>
-  // 在样式生效前落定主题，避免深色用户看到白闪
+  // 在样式生效前落定主题
   (function () {
     try {
       var saved = localStorage.getItem('ruanoo-ui-theme');
       if (saved === 'dark' || saved === 'light') {
         document.documentElement.dataset.ruTheme = saved;
       }
-    } catch (e) { /* 隐私模式下 localStorage 可能不可用 */ }
+    } catch (e) { /* localStorage 可能不可用 */ }
   })();
 </script>
 <style>
@@ -81,6 +81,28 @@
     font-family: Consolas, 'Courier New', monospace; font-size: 12px;
     color: var(--ru-settings-text-primary); overflow-x: auto; white-space: pre;
   }
+
+  /* 代码块折叠 */
+  .g-code-toggle { margin: 0 0 16px; }
+  .g-code-toggle > summary {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 3px 10px; border-radius: 6px; cursor: pointer;
+    list-style: none; user-select: none;
+    font-size: 12px; color: var(--ru-settings-text-secondary);
+    background-color: var(--ru-neutral-fill-rest);
+  }
+  .g-code-toggle > summary::-webkit-details-marker { display: none; }
+  .g-code-toggle > summary:hover { color: var(--ru-settings-text-primary); }
+  .g-code-toggle > summary::before {
+    content: ''; width: 0; height: 0;
+    border-left: 4px solid currentColor;
+    border-top: 4px solid transparent;
+    border-bottom: 4px solid transparent;
+    transition: transform 0.1s ease;
+  }
+  .g-code-toggle[open] > summary { margin-bottom: 8px; }
+  .g-code-toggle[open] > summary::before { transform: rotate(90deg); }
+  .g-code-toggle .g-code { margin-bottom: 0; }
   .g-row { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-bottom: 14px; }
   .g-col { display: flex; flex-direction: column; gap: 16px; max-width: 420px; }
   .g-label { font-size: 12px; color: var(--ru-settings-text-secondary); margin-bottom: 4px; display: block; }
@@ -148,12 +170,15 @@
         纯文字操作使用 <code>.ruanoo-icon-btn-text</code>。键盘聚焦有独立焦点环，
         禁用态降低不透明度。
       </p>
-      <div class="g-code">&lt;button class="ruanoo-btn ruanoo-btn-primary"&gt;保存&lt;/button&gt;
+      <details class="g-code-toggle">
+        <summary>代码</summary>
+        <div class="g-code">&lt;button class="ruanoo-btn ruanoo-btn-primary"&gt;保存&lt;/button&gt;
 &lt;button class="ruanoo-btn ruanoo-btn-secondary"&gt;取消&lt;/button&gt;
 &lt;button class="ruanoo-btn ruanoo-btn-danger"&gt;删除&lt;/button&gt;
 &lt;button class="ruanoo-btn ruanoo-btn-primary" disabled&gt;保存&lt;/button&gt;
 
 &lt;button class="ruanoo-icon-btn-text"&gt;&lt;svg/&gt;&lt;span&gt;编辑页面布局&lt;/span&gt;&lt;/button&gt;</div>
+      </details>
       <div class="g-row">
         <button type="button" class="ruanoo-btn ruanoo-btn-primary">保存</button>
         <button type="button" class="ruanoo-btn ruanoo-btn-secondary">取消</button>
@@ -176,14 +201,22 @@
         <code>.ruanoo-input-container</code> 是外壳，负责圆角裁切与校验态；
         加 <code>.ruanoo-error</code> 走危险色，配合 <code>.ruanoo-error-tip.ruanoo-active</code> 显示提示。
       </p>
-      <div class="g-code">&lt;div class="ruanoo-input-container"&gt;
+      <details class="g-code-toggle">
+        <summary>代码</summary>
+        <div class="g-code">&lt;div class="ruanoo-input-container"&gt;
   &lt;input class="ruanoo-input" placeholder="https://example.com"&gt;
 &lt;/div&gt;
 
 &lt;div class="ruanoo-input-container ruanoo-error"&gt;
   &lt;input class="ruanoo-input" value="not-a-url"&gt;
 &lt;/div&gt;
-&lt;div class="ruanoo-error-tip ruanoo-active"&gt;&lt;svg/&gt;&lt;span&gt;请输入有效 URL&lt;/span&gt;&lt;/div&gt;</div>
+&lt;div class="ruanoo-error-tip ruanoo-active"&gt;&lt;svg/&gt;&lt;span&gt;请输入有效 URL&lt;/span&gt;&lt;/div&gt;
+
+&lt;!-- 禁用 --&gt;
+&lt;div class="ruanoo-input-container"&gt;
+  &lt;input class="ruanoo-input" value="https://example.com/image.jpg" disabled&gt;
+&lt;/div&gt;</div>
+      </details>
       <div class="g-col">
         <div class="g-cell" style="min-width:340px">
           <label class="g-label">常规</label>
@@ -201,6 +234,12 @@
             <span>请输入有效 URL</span>
           </div>
         </div>
+        <div class="g-cell" style="min-width:340px">
+          <label class="g-label">禁用</label>
+          <div class="ruanoo-input-container">
+            <input type="text" class="ruanoo-input" value="https://example.com/image.jpg" disabled>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -214,7 +253,15 @@
         纯 CSS 实现，依赖 <code>@property</code> 与 <code>:has()</code>；
         基类 <code>.ruanoo-switch</code> 必须搭配下面两个变体类之一使用。
       </p>
-      <div class="g-code">&lt;!-- 常规：手柄是一根固定宽度的圆头竖线 --&gt;
+      <details class="g-code-toggle">
+        <summary>代码</summary>
+        <div class="g-code">&lt;!-- 经典：胶囊轨道 + 圆形手柄 --&gt;
+&lt;label class="ruanoo-switch ruanoo-switch-classic"&gt;
+  &lt;input type="checkbox"&gt;
+  &lt;span class="ruanoo-slider"&gt;&lt;/span&gt;
+&lt;/label&gt;
+
+&lt;!-- 常规：固定宽度的圆头竖线手柄 --&gt;
 &lt;label class="ruanoo-switch ruanoo-switch-standard"&gt;
   &lt;input type="checkbox"&gt;
   &lt;span class="ruanoo-slider"&gt;&lt;/span&gt;
@@ -224,9 +271,43 @@
 &lt;label class="ruanoo-switch ruanoo-switch-unique"&gt;
   &lt;input type="checkbox"&gt;
   &lt;span class="ruanoo-slider"&gt;&lt;/span&gt;
-&lt;/label&gt;</div>
+&lt;/label&gt;
 
-      <div class="g-col" style="max-width:520px">
+&lt;!-- 禁用：给 input 加 disabled --&gt;
+&lt;label class="ruanoo-switch ruanoo-switch-classic"&gt;
+  &lt;input type="checkbox" disabled&gt;
+  &lt;span class="ruanoo-slider"&gt;&lt;/span&gt;
+&lt;/label&gt;</div>
+      </details>
+
+      <div class="g-col" style="max-width:560px">
+        <div>
+          <span class="g-label">经典 · ruanoo-switch-classic</span>
+          <div class="g-row" style="margin-bottom:0">
+            <div class="ruanoo-switch-container">
+              <span class="ruanoo-setting-status-text">关闭</span>
+              <label class="ruanoo-switch ruanoo-switch-classic">
+                <input type="checkbox">
+                <span class="ruanoo-slider"></span>
+              </label>
+            </div>
+            <div class="ruanoo-switch-container">
+              <span class="ruanoo-setting-status-text">打开</span>
+              <label class="ruanoo-switch ruanoo-switch-classic">
+                <input type="checkbox" checked>
+                <span class="ruanoo-slider"></span>
+              </label>
+            </div>
+            <div class="ruanoo-switch-container">
+              <span class="ruanoo-setting-status-text">禁用</span>
+              <label class="ruanoo-switch ruanoo-switch-classic">
+                <input type="checkbox" checked disabled>
+                <span class="ruanoo-slider"></span>
+              </label>
+            </div>
+          </div>
+        </div>
+
         <div>
           <span class="g-label">常规 · ruanoo-switch-standard</span>
           <div class="g-row" style="margin-bottom:0">
@@ -241,6 +322,13 @@
               <span class="ruanoo-setting-status-text">打开</span>
               <label class="ruanoo-switch ruanoo-switch-standard">
                 <input type="checkbox" checked>
+                <span class="ruanoo-slider"></span>
+              </label>
+            </div>
+            <div class="ruanoo-switch-container">
+              <span class="ruanoo-setting-status-text">禁用</span>
+              <label class="ruanoo-switch ruanoo-switch-standard">
+                <input type="checkbox" disabled>
                 <span class="ruanoo-slider"></span>
               </label>
             </div>
@@ -264,13 +352,51 @@
                 <span class="ruanoo-slider"></span>
               </label>
             </div>
+            <div class="ruanoo-switch-container">
+              <span class="ruanoo-setting-status-text">禁用</span>
+              <label class="ruanoo-switch ruanoo-switch-unique">
+                <input type="checkbox" disabled>
+                <span class="ruanoo-slider"></span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <span class="g-label">单独使用 · 不套 .ruanoo-switch-container，也不带状态文字</span>
+          <div class="g-row" style="margin-bottom:0">
+            <label class="ruanoo-switch ruanoo-switch-classic">
+              <input type="checkbox">
+              <span class="ruanoo-slider"></span>
+            </label>
+            <label class="ruanoo-switch ruanoo-switch-classic">
+              <input type="checkbox" checked>
+              <span class="ruanoo-slider"></span>
+            </label>
+            <label class="ruanoo-switch ruanoo-switch-standard">
+              <input type="checkbox">
+              <span class="ruanoo-slider"></span>
+            </label>
+            <label class="ruanoo-switch ruanoo-switch-standard">
+              <input type="checkbox" checked>
+              <span class="ruanoo-slider"></span>
+            </label>
+            <label class="ruanoo-switch ruanoo-switch-unique">
+              <input type="checkbox">
+              <span class="ruanoo-slider"></span>
+            </label>
+            <label class="ruanoo-switch ruanoo-switch-unique">
+              <input type="checkbox" checked>
+              <span class="ruanoo-slider"></span>
+            </label>
           </div>
         </div>
       </div>
 
       <p class="g-note">
-        常规的手柄宽度固定，切换时只换颜色；独特的手柄关闭态是空心圆环、打开态收成竖线。
-        两者两侧胶囊的宽度都互补伸缩，末段再渐隐，所以收缩过程不会出现被压扁的弧度。
+        经典是胶囊轨道加圆形手柄，手柄随状态放大；常规的手柄是固定宽度的圆头竖线；
+        独特的手柄关闭态是空心圆环、打开态收成竖线。
+        禁用时给 <code>input</code> 加 <code>disabled</code>，整体降到 50% 不透明度。
       </p>
     </section>
 
@@ -284,7 +410,9 @@
         点击组件之外或按 <code>Tab</code> 都会收起。
         选中后派发 <code>ruanoo:select-change</code>。
       </p>
-      <div class="g-code">&lt;div class="ruanoo-custom-select-wrapper" data-ru-select&gt;
+      <details class="g-code-toggle">
+        <summary>代码</summary>
+        <div class="g-code">&lt;div class="ruanoo-custom-select-wrapper" data-ru-select&gt;
   &lt;select class="ruanoo-select-box" tabindex="-1" aria-hidden="true"&gt;&lt;/select&gt;
   &lt;button type="button" class="ruanoo-custom-select-display"
           aria-haspopup="listbox" aria-expanded="false"&gt;
@@ -303,6 +431,7 @@
          role="option" aria-disabled="true"&gt;高对比度&lt;/div&gt;
   &lt;/div&gt;
 &lt;/div&gt;</div>
+      </details>
       <div class="g-col">
         <div class="g-cell" style="min-width:280px">
           <div class="ruanoo-custom-select-wrapper" data-ru-select>
@@ -343,7 +472,9 @@
         <code>.ruanoo-idx-1</code> / <code>.ruanoo-idx-2</code> 控制位移，首项无需额外类。
         分别派发 <code>ruanoo:segment-change</code> 与 <code>ruanoo:preset-change</code>。
       </p>
-      <div class="g-code">&lt;div class="ruanoo-theme-switch" data-ru-segment role="radiogroup"&gt;
+      <details class="g-code-toggle">
+        <summary>代码</summary>
+        <div class="g-code">&lt;div class="ruanoo-theme-switch" data-ru-segment role="radiogroup"&gt;
   &lt;button class="ruanoo-theme-option ruanoo-active" role="radio" aria-checked="true"&gt;
     &lt;svg/&gt;
     &lt;span class="ruanoo-theme-option-label"&gt;
@@ -363,6 +494,7 @@
 
 &lt;!-- 当前配置与任何预设都不匹配时，隐藏滑块 --&gt;
 &lt;div class="ruanoo-layout-presets ruanoo-no-thumb"&gt;…&lt;/div&gt;</div>
+      </details>
 
       <div class="g-col" style="max-width:420px">
         <div>
@@ -425,7 +557,9 @@
         <code>.ruanoo-settings-card-header</code> 用于左右分栏的标题行，
         <code>.ruanoo-settings-content</code> 是卡片的纵向堆叠容器。
       </p>
-      <div class="g-code">&lt;div class="ruanoo-settings-content"&gt;
+      <details class="g-code-toggle">
+        <summary>代码</summary>
+        <div class="g-code">&lt;div class="ruanoo-settings-content"&gt;
   &lt;div class="ruanoo-settings-card"&gt;
     &lt;div class="ruanoo-settings-card-header"&gt;
       &lt;span&gt;主题模式&lt;/span&gt;
@@ -438,6 +572,7 @@
     &lt;input type="file" id="import-file" class="ruanoo-file-input-hidden"&gt;
   &lt;/div&gt;
 &lt;/div&gt;</div>
+      </details>
       <div class="ruanoo-settings-content" style="max-width:520px;padding:0">
         <div class="ruanoo-settings-card">
           <div class="ruanoo-settings-card-header">
@@ -475,7 +610,9 @@
         两者与下拉浮层共用同一套分层方式：透明描边占位 + <code>--ru-dropdown-shadow</code>，
         不使用实线边框。层级由 <code>--ru-z-*</code> 变量统一控制。
       </p>
-      <div class="g-code">&lt;div class="ruanoo-quicklink-menu ruanoo-active" role="menu"&gt;
+      <details class="g-code-toggle">
+        <summary>代码</summary>
+        <div class="g-code">&lt;div class="ruanoo-quicklink-menu ruanoo-active" role="menu"&gt;
   &lt;button class="ruanoo-quicklink-menu-item" role="menuitem"&gt;
     &lt;svg/&gt;&lt;span&gt;在新标签页打开&lt;/span&gt;
   &lt;/button&gt;
@@ -486,6 +623,7 @@
     &lt;button class="ruanoo-icon-preset-item ruanoo-selected"&gt;&lt;svg/&gt;&lt;/button&gt;
   &lt;/div&gt;
 &lt;/div&gt;</div>
+      </details>
       <div class="g-row" style="align-items:flex-start">
         <div class="ruanoo-quicklink-menu ruanoo-active" style="position:static;display:block" role="menu">
           <button type="button" class="ruanoo-quicklink-menu-item" role="menuitem" data-ru-action="open">
@@ -534,12 +672,15 @@
         <code>Home</code>/<code>End</code>，选中派发 <code>ruanoo:manage-select</code>，
         <code>detail.action</code> 取自 <code>data-ru-action</code>。
       </p>
-      <div class="g-code">&lt;div class="ruanoo-manage-list" data-ru-manage role="listbox"&gt;
+      <details class="g-code-toggle">
+        <summary>代码</summary>
+        <div class="g-code">&lt;div class="ruanoo-manage-list" data-ru-manage role="listbox"&gt;
   &lt;div class="ruanoo-manage-option" role="option" tabindex="0"
        aria-selected="true" data-ru-action="export"&gt;
     &lt;svg/&gt;&lt;span class="ruanoo-manage-option-label"&gt;导出配置&lt;/span&gt;
   &lt;/div&gt;
 &lt;/div&gt;</div>
+      </details>
       <div style="max-width:340px">
         <p class="ruanoo-manage-list-hint">选择要执行的操作</p>
         <div class="ruanoo-manage-list" data-ru-manage role="listbox" aria-label="示例操作">
@@ -569,7 +710,9 @@
         打开时把焦点移入、关闭时归还给触发按钮，并把 <code>Tab</code> 焦点锁在对话框内。
         示例里的保存按钮带 URL 校验，校验通过才关闭。
       </p>
-      <div class="g-code">&lt;button class="ruanoo-btn ruanoo-btn-secondary"
+      <details class="g-code-toggle">
+        <summary>代码</summary>
+        <div class="g-code">&lt;button class="ruanoo-btn ruanoo-btn-secondary"
         data-ru-open-modal="my-modal"&gt;打开&lt;/button&gt;
 
 &lt;div class="ruanoo-modal-overlay" id="my-modal"&gt;
@@ -587,6 +730,7 @@
     &lt;/div&gt;
   &lt;/div&gt;
 &lt;/div&gt;</div>
+      </details>
       <div class="g-row">
         <button type="button" class="ruanoo-btn ruanoo-btn-secondary" data-ru-open-modal="demo-modal">打开弹窗</button>
       </div>
@@ -600,11 +744,14 @@
         <code>.ruanoo-settings-footer-links</code>，第二行由相邻选择器自动调淡，
         最下方是 <code>.ruanoo-settings-footer-text</code>。
       </p>
-      <div class="g-code">&lt;div class="ruanoo-settings-footer"&gt;
+      <details class="g-code-toggle">
+        <summary>代码</summary>
+        <div class="g-code">&lt;div class="ruanoo-settings-footer"&gt;
   &lt;div class="ruanoo-settings-footer-links"&gt;&lt;a&gt;版本&lt;/a&gt; …&lt;/div&gt;
   &lt;div class="ruanoo-settings-footer-links"&gt;&lt;a&gt;隐私政策&lt;/a&gt; · …&lt;/div&gt;
   &lt;div class="ruanoo-settings-footer-text"&gt;免责声明&lt;/div&gt;
 &lt;/div&gt;</div>
+      </details>
       <div class="ruanoo-settings-card" style="padding:0;max-width:560px">
         <div class="ruanoo-settings-footer">
           <div class="ruanoo-settings-footer-links">
