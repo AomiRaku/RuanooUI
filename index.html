@@ -208,37 +208,69 @@
     <section id="switches">
       <h2 class="g-h2">开关</h2>
       <p class="g-desc">
-        由 <code>.ruanoo-switch::before</code>（左半胶囊）、<code>.ruanoo-slider::before</code>（手柄）、
-        <code>.ruanoo-switch::after</code>（右半胶囊）三块组成。位置与宽度统一由可过渡变量
-        <code>--ru-p</code> 推导，因此滑动全程手柄与两侧胶囊的间隙恒为 2px。
-        纯 CSS 实现，依赖 <code>@property</code> 与 <code>:has()</code>。
+        两种形态共用同一套结构：<code>.ruanoo-switch::before</code>（左半胶囊）、
+        <code>.ruanoo-slider::before</code>（手柄）、<code>.ruanoo-switch::after</code>（右半胶囊）。
+        位置与宽度统一由可过渡变量 <code>--ru-p</code> 推导，因此滑动全程手柄与两侧胶囊的间隙恒为 2px。
+        纯 CSS 实现，依赖 <code>@property</code> 与 <code>:has()</code>；
+        基类 <code>.ruanoo-switch</code> 必须搭配下面两个变体类之一使用。
       </p>
-      <div class="g-code">&lt;div class="ruanoo-switch-container"&gt;
-  &lt;span class="ruanoo-setting-status-text"&gt;关闭&lt;/span&gt;
-  &lt;label class="ruanoo-switch"&gt;
-    &lt;input type="checkbox"&gt;
-    &lt;span class="ruanoo-slider"&gt;&lt;/span&gt;
-  &lt;/label&gt;
-&lt;/div&gt;</div>
-      <div class="g-row">
-        <div class="ruanoo-switch-container">
-          <span class="ruanoo-setting-status-text">关闭</span>
-          <label class="ruanoo-switch">
-            <input type="checkbox">
-            <span class="ruanoo-slider" id="switch-off"></span>
-          </label>
+      <div class="g-code">&lt;!-- 常规：手柄是一根固定宽度的圆头竖线 --&gt;
+&lt;label class="ruanoo-switch ruanoo-switch-standard"&gt;
+  &lt;input type="checkbox"&gt;
+  &lt;span class="ruanoo-slider"&gt;&lt;/span&gt;
+&lt;/label&gt;
+
+&lt;!-- 独特：手柄由空心圆环收成圆头竖线 --&gt;
+&lt;label class="ruanoo-switch ruanoo-switch-unique"&gt;
+  &lt;input type="checkbox"&gt;
+  &lt;span class="ruanoo-slider"&gt;&lt;/span&gt;
+&lt;/label&gt;</div>
+
+      <div class="g-col" style="max-width:520px">
+        <div>
+          <span class="g-label">常规 · ruanoo-switch-standard</span>
+          <div class="g-row" style="margin-bottom:0">
+            <div class="ruanoo-switch-container">
+              <span class="ruanoo-setting-status-text">关闭</span>
+              <label class="ruanoo-switch ruanoo-switch-standard">
+                <input type="checkbox">
+                <span class="ruanoo-slider"></span>
+              </label>
+            </div>
+            <div class="ruanoo-switch-container">
+              <span class="ruanoo-setting-status-text">打开</span>
+              <label class="ruanoo-switch ruanoo-switch-standard">
+                <input type="checkbox" checked>
+                <span class="ruanoo-slider"></span>
+              </label>
+            </div>
+          </div>
         </div>
-        <div class="ruanoo-switch-container">
-          <span class="ruanoo-setting-status-text">打开</span>
-          <label class="ruanoo-switch">
-            <input type="checkbox" checked>
-            <span class="ruanoo-slider" id="switch-on"></span>
-          </label>
+
+        <div>
+          <span class="g-label">独特 · ruanoo-switch-unique</span>
+          <div class="g-row" style="margin-bottom:0">
+            <div class="ruanoo-switch-container">
+              <span class="ruanoo-setting-status-text">关闭</span>
+              <label class="ruanoo-switch ruanoo-switch-unique">
+                <input type="checkbox">
+                <span class="ruanoo-slider"></span>
+              </label>
+            </div>
+            <div class="ruanoo-switch-container">
+              <span class="ruanoo-setting-status-text">打开</span>
+              <label class="ruanoo-switch ruanoo-switch-unique">
+                <input type="checkbox" checked>
+                <span class="ruanoo-slider"></span>
+              </label>
+            </div>
+          </div>
         </div>
       </div>
+
       <p class="g-note">
-        手柄关闭态是空心圆环，打开态收成圆头竖线；两侧胶囊的宽度互补伸缩，
-        末段再渐隐，所以收缩过程不会出现被压扁的弧度。
+        常规的手柄宽度固定，切换时只换颜色；独特的手柄关闭态是空心圆环、打开态收成竖线。
+        两者两侧胶囊的宽度都互补伸缩，末段再渐隐，所以收缩过程不会出现被压扁的弧度。
       </p>
     </section>
 

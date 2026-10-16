@@ -378,25 +378,30 @@
   align-items: center;
 }
 
-/* 滑块开关样式 */
+/* --------------------------------------------------------------------------
+   开关
+   --------------------------------------------------------------------------
+   两种形态共用同一套驱动方式：进度值 --ru-p（0 → 1）同时决定手柄位置与两半
+   胶囊的露出宽度，因此过渡中任何一帧，手柄与两侧胶囊的间隙都精确等于 2px。
+   使用时基类与变体类必须同时给出：
+
+     <label class="ruanoo-switch ruanoo-switch-standard">…</label>
+     <label class="ruanoo-switch ruanoo-switch-unique">…</label>
+   -------------------------------------------------------------------------- */
+
 .ruanoo-switch {
   position: relative;
   display: inline-block;
-  /* 进度值驱动一切。下面两个位置/宽度由它算出，
-     所以过渡中任何一帧的间隙都精确等于 2px */
-  --ru-p: 0;
-  /* 打开态手柄：左边缘 25px、宽 5px → 右边缘正好 30px（贴住控件右边，不被裁） */
-  --ru-thumb-left: calc(var(--ru-p) * 25px);
-  --ru-thumb-w: calc(16px - var(--ru-p) * 11px);
-  /* 左半边宽度：右边界 = 手柄左边缘 − 2，可见期间间隙恒为 2px */
-  --ru-lw: max(0px, calc(var(--ru-thumb-left) - 2px));
-  /* 右半边宽度：左边界 = 手柄右边缘 + 2，间隙同样恒为 2px */
-  --ru-rw: max(0px, calc(28px - var(--ru-thumb-left) - var(--ru-thumb-w)));
-  width: 30px;                 /* 28 → 30：让半胶囊放得下"半圆 + 小圆角" */
-  height: 16px;                /* 高度略降（原 18px） */
-  transition: --ru-p 0.2s ease;
+  height: 16px;
+  cursor: pointer;
   /* 兜底：任何元素都不越出控件范围 */
   overflow: hidden;
+  /* 进度值驱动一切 */
+  --ru-p: 0;
+  --ru-thumb-left: 0px;
+  /* 左半边宽度：右边界 = 手柄左边缘 − 2，可见期间间隙恒为 2px */
+  --ru-lw: max(0px, calc(var(--ru-thumb-left) - 2px));
+  transition: --ru-p 0.2s ease;
 }
 
 .ruanoo-switch input {
@@ -404,13 +409,6 @@
   width: 0;
   height: 0;
 }
-
-/* ===== 抽象开关：左半边胶囊 + 手柄 + 右半边胶囊 =====
-   三个形状横向排布。手柄左右滑动时，一侧的半边胶囊收窄、另一侧伸展；
-   两半都只让"平直端"移动，大端（半圆）固定不动，所以两端弧度与圆角
-   全程不变 —— 看上去就是"胶囊被缩短 / 伸长"。
-   宽度下限 11px ＝ 大端半径 8 + 平直端圆角 3，低于它圆角会被等比缩小。
-   两张半边各自只圆外侧的角，合起来正好是一个胶囊。 */
 
 /* 点击层：填满控件、完全透明，只负责接收点击 */
 .ruanoo-slider {
@@ -422,61 +420,128 @@
   cursor: pointer;
 }
 
-/* 左半边胶囊：左圆右直。左端固定，只缩右端；最小 11px（＝两端半径之和） */
-.ruanoo-switch::before {
+/* 打开态：进度推到 1，手柄位置与两半胶囊的宽度随之全部到位 */
+.ruanoo-switch:has(input:checked) {
+  --ru-p: 1;
+}
+
+/* ===== 常规：手柄是一根固定宽度的圆头竖线 ===== */
+.ruanoo-switch-standard {
+  width: 26px;
+  /* 打开态手柄：左边缘 21px、宽 5px → 右边缘 26px，正好贴住控件右边不被裁 */
+  --ru-thumb-left: calc(var(--ru-p) * 21px);
+  --ru-thumb-w: 5px;
+  /* 右半边宽度：左边界 = 手柄右边缘 + 2，间隙同样恒为 2px */
+  --ru-rw: max(0px, calc(24px - var(--ru-thumb-left) - var(--ru-thumb-w)));
+}
+
+/* 左半边胶囊：左圆右直。胶囊比控件矮一档，因此垂直居中而不是撑满 */
+.ruanoo-switch-standard::before {
   content: "";
   position: absolute;
-  top: 0;
-  bottom: 0;
-  background-color: var(--ru-accent-foreground-rest);
-  /* 斜杠前是水平半径、后是垂直半径。
-     垂直半径固定 8px / 3px，所以宽度足够时外观不变；
-     水平半径随宽度收窄，使两端之和始终不超过宽度 ——
-     这样只有横向被压缩，圆端的纵向弧度不会被压扁、不会坍缩成一条线 */
-  border-radius:
-    min(8px, var(--ru-lw)) min(3px, max(0px, var(--ru-lw) - 8px))
-    min(3px, max(0px, var(--ru-lw) - 8px)) min(8px, var(--ru-lw))
-    / 8px 3px 3px 8px;
-  /* 左端固定，只让右端随宽度伸缩 —— 大端不会被推出裁掉。
-     最小 11px 是两端半径之和（8+3），再小圆角就会被等比缩小 */
+  top: 50%;
+  transform: translateY(-50%);
+  height: 13px;
+  /* 左端固定，只让右端随宽度伸缩 —— 大端不会被推出裁掉 */
   left: 0;
-  /* 右边界 = 手柄左边缘 − 2，于是间隙恒为 2px。
-     关闭时算出 −2px，被 max() 取 0 → 宽度归零，不残留像素 */
   width: var(--ru-lw);
-  /* 只在"圆角与圆端相接"（宽度 11px）之后渐隐：
-       p ≥ 0.5        （宽度 ≥ 11px）→ 1，完整显示
-       p 0.375 ~ 0.5  （宽度 7.75 ~ 11px）→ 1 → 0，渐隐
-       p ≤ 0.375      （宽度 ≤ 7.75px）→ 0
-     所以收缩时前段是纯缩短，只在末段淡出。 */
+  background-color: var(--ru-accent-foreground-rest);
+  /* 斜杠前是水平半径、后是垂直半径。垂直半径固定，所以宽度足够时外观不变；
+     水平半径随宽度收窄，使两端之和始终不超过宽度 —— 只有横向被压缩，
+     圆端的纵向弧度不会被压扁、不会坍缩成线 */
+  border-radius:
+    min(6.5px, var(--ru-lw)) min(3px, max(0px, var(--ru-lw) - 6.5px))
+    min(3px, max(0px, var(--ru-lw) - 6.5px)) min(6.5px, var(--ru-lw))
+    / 6.5px 3px 3px 6.5px;
+  /* 窄过两端半径之和（9.5px）之后渐隐，收缩的前段是纯缩短 */
   opacity: clamp(0, (var(--ru-p) - 0.375) * 8, 1);
 }
 
-/* 右半边胶囊：左直右圆。右端固定，只缩左端；最小 11px（＝两端半径之和） */
-.ruanoo-switch::after {
+/* 右半边胶囊：左直右圆，与左半边镜像 */
+.ruanoo-switch-standard::after {
   content: "";
   position: absolute;
-  top: 0;
-  bottom: 0;
-  /* 右端固定，宽度伸缩 —— 与左半边对称，大端不会被推出裁掉。
-     宽度 = 12px − p×14，恰好使左边界 = 手柄右边缘 + 2，间隙恒为 2px */
+  top: 50%;
+  transform: translateY(-50%);
+  height: 13px;
   right: 0;
   width: var(--ru-rw);
   background-color: var(--ru-settings-card-border);
-  /* 斜杠前是水平半径、后是垂直半径。
-     垂直半径固定 3px / 8px，宽度足够时外观不变；
-     水平半径随宽度收窄，两端之和始终不超过宽度 ——
-     这样只压横向，圆端的纵向弧度不会被压扁、不会坍缩成线 */
   border-radius:
-    min(3px, max(0px, var(--ru-rw) - 8px)) min(8px, var(--ru-rw))
-    min(8px, var(--ru-rw)) min(3px, max(0px, var(--ru-rw) - 8px))
-    / 3px 8px 8px 3px;
+    min(3px, max(0px, var(--ru-rw) - 6.5px)) min(6.5px, var(--ru-rw))
+    min(6.5px, var(--ru-rw)) min(3px, max(0px, var(--ru-rw) - 6.5px))
+    / 3px 6.5px 6.5px 3px;
   /* 与左半边镜像对称的末段渐隐 */
   opacity: clamp(0, (0.625 - var(--ru-p)) * 8, 1);
   transition: background-color 0.2s ease;
 }
 
-/* 手柄：关闭态＝空心圆环，位于左端 */
-.ruanoo-slider::before {
+/* 手柄：一根圆头竖线，只左右移动 */
+.ruanoo-switch-standard .ruanoo-slider::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: var(--ru-thumb-left);
+  width: var(--ru-thumb-w);
+  height: 16px;
+  background-color: var(--ru-settings-card-border);
+  border-radius: 999px;
+  /* 伪元素不拦截指针，点击统一由铺满控件的 .ruanoo-slider 接收 */
+  pointer-events: none;
+  transition: background-color 0.2s ease;
+}
+
+/* 打开态只换颜色，形状不变 */
+.ruanoo-switch-standard:has(input:checked) .ruanoo-slider::before {
+  background-color: var(--ru-accent-foreground-rest);
+}
+
+/* 悬停整体变淡。用 opacity 而非 brightness：后者按比例缩放通道绝对值，
+   对近黑与近白几乎看不出变化，也无法同时适配浅色该变亮、深色该变暗。 */
+.ruanoo-switch-standard:hover {
+  opacity: 0.7;
+}
+
+/* ===== 独特：手柄关闭态是空心圆环，打开态收成圆头竖线 ===== */
+.ruanoo-switch-unique {
+  width: 30px;
+  --ru-thumb-left: calc(var(--ru-p) * 25px);
+  --ru-thumb-w: calc(16px - var(--ru-p) * 11px);
+  --ru-rw: max(0px, calc(28px - var(--ru-thumb-left) - var(--ru-thumb-w)));
+}
+
+.ruanoo-switch-unique::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: var(--ru-lw);
+  background-color: var(--ru-accent-foreground-rest);
+  border-radius:
+    min(8px, var(--ru-lw)) min(3px, max(0px, var(--ru-lw) - 8px))
+    min(3px, max(0px, var(--ru-lw) - 8px)) min(8px, var(--ru-lw))
+    / 8px 3px 3px 8px;
+  opacity: clamp(0, (var(--ru-p) - 0.375) * 8, 1);
+}
+
+.ruanoo-switch-unique::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  width: var(--ru-rw);
+  background-color: var(--ru-settings-card-border);
+  border-radius:
+    min(3px, max(0px, var(--ru-rw) - 8px)) min(8px, var(--ru-rw))
+    min(8px, var(--ru-rw)) min(3px, max(0px, var(--ru-rw) - 8px))
+    / 3px 8px 8px 3px;
+  opacity: clamp(0, (0.625 - var(--ru-p)) * 8, 1);
+  transition: background-color 0.2s ease;
+}
+
+.ruanoo-switch-unique .ruanoo-slider::before {
   content: "";
   position: absolute;
   top: 0;
@@ -484,33 +549,36 @@
   width: var(--ru-thumb-w);
   height: 16px;
   /* 环用内阴影画：border 会参与布局，在竖线那种极窄宽度下把元素撑宽。
-     环心保持透明（真正镂空）：悬停时的 filter: brightness() 只影响有色像素，
-     所以环心不会跟着变色；下面也没有任何需要遮挡的底色 */
+     环心保持透明，是真正镂空 */
   background-color: transparent;
-  /* 环壁 4px，与打开态竖线的宽度一致；16px 外径 → 内径 8px */
   box-shadow: inset 0 0 0 4px var(--ru-settings-card-border);
   border-radius: 50%;
-  /* left / width 由 --ru-thumb-left / --ru-thumb-w 驱动，已在 .ruanoo-switch 上插值，
+  /* left / width 已由 --ru-thumb-left / --ru-thumb-w 在 .ruanoo-switch 上插值，
      这里不能再加过渡，否则同一个变化会被叠加两次 */
   transition: box-shadow 0.2s ease, background-color 0.2s ease, border-radius 0.2s ease;
 }
 
-/* 悬停时整个开关一起变色（三个形状都在 .ruanoo-switch 内，filter 会作用于全部） */
-.ruanoo-switch:hover {
-  filter: brightness(0.94);
-}
-
-/* ===== 打开态 ===== */
-.ruanoo-switch:has(input:checked) {
-  /* 打开：进度推到 1，手柄位置/宽度、两半胶囊宽度随之全部到位 */
-  --ru-p: 1;
-}
-
-.ruanoo-switch:has(input:checked) .ruanoo-slider::before {
-  /* 位置与宽度已由变量驱动，这里只负责"圆环 → 圆头竖线"的形状变化 */
+.ruanoo-switch-unique:has(input:checked) .ruanoo-slider::before {
+  /* 位置与宽度已由变量驱动，这里只负责圆环 → 圆头竖线的形状变化 */
   box-shadow: inset 0 0 0 0 var(--ru-accent-foreground-rest);
   background-color: var(--ru-accent-foreground-rest);
   border-radius: 999px;
+}
+
+.ruanoo-switch-unique:hover {
+  filter: brightness(0.94);
+}
+
+/* 拖动进行中：由脚本加类，临时关掉过渡并换成抓取光标
+   （--ru-p 逐帧写入时若还带 0.2s 过渡，手柄会明显滞后） */
+.ruanoo-switch.ruanoo-switch-dragging,
+.ruanoo-switch.ruanoo-switch-dragging .ruanoo-slider::before {
+  transition: none;
+}
+
+.ruanoo-switch.ruanoo-switch-dragging,
+.ruanoo-switch.ruanoo-switch-dragging .ruanoo-slider {
+  cursor: grabbing;
 }
 
 /* 卡片视图选择器 */

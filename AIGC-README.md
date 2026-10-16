@@ -158,7 +158,7 @@ document.documentElement.dataset.ruTheme = 'dark';
 ```html
 <div class="ruanoo-switch-container">
   <span class="ruanoo-setting-status-text">关闭</span>
-  <label class="ruanoo-switch">
+  <label class="ruanoo-switch ruanoo-switch-standard">
     <input type="checkbox">
     <span class="ruanoo-slider"></span>
   </label>
@@ -167,9 +167,16 @@ document.documentElement.dataset.ruTheme = 'dark';
 
 ![开关](preview-switch.png)
 
-开关由三个形状组成：`.ruanoo-switch::before` 是左半胶囊、`.ruanoo-slider::before` 是手柄、`.ruanoo-switch::after` 是右半胶囊。位置与宽度全部由可过渡变量 `--ru-p`（0 → 1）推导，因此滑动全程手柄与两侧胶囊的间隙恒为 2px；两半胶囊的圆角采用「垂直半径固定 + 水平半径随宽度收窄」的写法，收缩时弧度不会被压扁。
+基类 `.ruanoo-switch` 提供尺寸与驱动逻辑，必须搭配下面两个变体类之一：
 
-手柄关闭态是空心圆环，打开态收成圆头竖线。
+| 变体 | 形态 |
+| --- | --- |
+| `.ruanoo-switch-standard` | **常规**。宽 26px，手柄是一根固定 5px 宽的圆头竖线；两半胶囊高 13px、垂直居中；悬停整体降到 70% 不透明度 |
+| `.ruanoo-switch-unique` | **独特**。宽 30px，两半胶囊撑满 16px 高；手柄关闭态是空心圆环、打开态收成竖线；悬停用亮度变化 |
+
+两者结构相同：`.ruanoo-switch::before` 是左半胶囊、`.ruanoo-slider::before` 是手柄、`.ruanoo-switch::after` 是右半胶囊。位置与宽度全部由可过渡变量 `--ru-p`（0 → 1）推导，因此滑动全程手柄与两侧胶囊的间隙恒为 2px；两半胶囊的圆角采用「垂直半径固定 + 水平半径随宽度收窄」的写法，收缩时弧度不会被压扁。
+
+实现拖动时，在拖动期间给 `.ruanoo-switch` 加上 `.ruanoo-switch-dragging`：它会关掉过渡并换成抓取光标，避免 `--ru-p` 逐帧写入时手柄滞后。
 
 > 依赖 `@property` 与 `:has()`，需要 **Chrome 105+ / Edge 105+ / Safari 17.2+**。
 
